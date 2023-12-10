@@ -17,6 +17,16 @@ public struct AddViewRow {
     }
 }
 
+extension AddViewViewModel {
+    convenience init(onSelect: @escaping (any MakeableView) -> Void) {
+        self.init(rows: AALibrary.shared.views.map { viewType in
+            .init(title: viewType.type.title, onTap: {
+                onSelect(viewType.makeDefault())
+            })
+        })
+    }
+}
+
 public class AddViewViewModel: ObservableObject {
     let rows: [AddViewRow]
     

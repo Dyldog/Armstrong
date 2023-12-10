@@ -1,18 +1,6 @@
 // Generated using Sourcery 2.0.2 — https://github.com/krzysztofzablocki/Sourcery
 // DO NOT EDIT
 
-extension AddViewViewModel {
-    convenience init(onSelect: @escaping (any MakeableView) -> Void) {
-        self.init(rows: [
-
-            .init(title: "Stack", onTap: {
-                onSelect(MakeableStack.makeDefault())
-            })
-        ])
-    }
-}
-
-
 
 
 public class Armstrong: AAProvider {
@@ -91,7 +79,7 @@ extension Axis: Copying {
 }
 
 extension VariableType {
-    static var axis: VariableType { .init() } // Axis
+    static var axis: VariableType { .init(title: "Axis") } // Axis
 }
 
 
@@ -113,7 +101,7 @@ extension AnyValue: Copying {
 
 
 extension VariableType {
-    static var anyValue: VariableType { .init() } // AnyValue
+    static var anyValue: VariableType { .init(title: "anyValue") } // AnyValue
 }
 
 // MakeableArray
@@ -129,7 +117,7 @@ extension MakeableArray: Copying {
 
 
 extension VariableType {
-    static var makeableArray: VariableType { .init() } // MakeableArray
+    static var makeableArray: VariableType { .init(title: "makeableArray") } // MakeableArray
 }
 
 // MakeableStack
@@ -176,7 +164,7 @@ extension MakeableStack {
 }
 
 extension VariableType {
-    static var stack: VariableType { .init() } // MakeableStack
+    static var stack: VariableType { .init(title: "Stack") } // MakeableStack
 }
 
 // SetVarStep
@@ -230,7 +218,7 @@ extension SetVarStep {
 }
 
 extension VariableType {
-    static var setVarStep: VariableType { .init() } // SetVarStep
+    static var setVarStep: VariableType { .init(title: "SetVarStep") } // SetVarStep
 }
 
 // StepArray
@@ -245,7 +233,7 @@ extension StepArray: Copying {
 
 
 extension VariableType {
-    static var stepArray: VariableType { .init() } // StepArray
+    static var stepArray: VariableType { .init(title: "StepArray") } // StepArray
 }
 
 // StringValue
@@ -260,8 +248,9 @@ extension StringValue: Copying {
 
 
 extension VariableType {
-    static var string: VariableType { .init() } // StringValue
+    static var string: VariableType { .init(title: "String") } // StringValue
 }
+
 
 
 

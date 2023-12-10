@@ -6,29 +6,31 @@
 //
 
 import SwiftUI
+import DylKit
 
 public struct EditVariableView: View {
     let name: String
-    @State var selectedType: VariableType
+    @State var selectedTypeIndex: Int
+    var selectedType: any EditableVariableValue.Type { AALibrary.shared.values[selectedTypeIndex] }
     @State var value: any EditableVariableValue
     let onUpdate: (any EditableVariableValue) -> Void
     
     public init(name: String, value: any EditableVariableValue, onUpdate: @escaping (any EditableVariableValue) -> Void) {
         self._value = .init(initialValue: value)
         self.onUpdate = onUpdate
-        self._selectedType = .init(initialValue: type(of: value).type)
+        self.selectedTypeIndex = AALibrary.shared.values.firstIndex { $0.type == type(of: value).type } ?? 0
         self.name = name
     }
-    
+        
     public var body: some View {
         NavigationView {
             List {
                 HStack {
                     Text("Type")
                     Spacer()
-                    Picker("Type", selection: $selectedType) {
-                        ForEach(VariableType.allCases) {
-                            Text($0.protoString).tag($0)
+                    Picker("Type", selection: $selectedTypeIndex) {
+                        ForEach(enumerated: AALibrary.shared.values) { (index, element) in
+                            Text(element.type.title).tag(index)
                         }
                     }.pickerStyle(.menu)
                 }
@@ -46,8 +48,8 @@ public struct EditVariableView: View {
             }
             .buttonStyle(.plain)
             .navigationTitle(name)
-            .onChange(of: selectedType, perform: { value in
-                self.value = value.defaultView
+            .onChange(of: selectedTypeIndex, perform: { value in
+                self.value = selectedType.makeDefault()
                 onUpdate(self.value)
             })
         }

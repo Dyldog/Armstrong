@@ -12,9 +12,7 @@ public protocol StepType: ViewEditable, CompositeEditableVariableValue {
 }
 
 public extension StepType {
-    
-    static var type: VariableType { fatalError() }
-    
+        
 //    var valueString: String { protoString }
     
     func value(with variables: Variables) async throws -> VariableValue {

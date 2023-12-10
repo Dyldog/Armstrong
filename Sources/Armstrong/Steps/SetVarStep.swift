@@ -10,7 +10,7 @@ import SwiftUI
 public final class SetVarStep: Step {
     
     public static var title: String { "Set variable" }
-    public static var type: VariableType { fatalError() }
+    public static var type: VariableType { .setVarStep }
     
     var varName: AnyValue
     var value: AnyValue

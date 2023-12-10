@@ -8,16 +8,22 @@
 import Foundation
 
 public struct VariableType: CaseIterable, Equatable, Codable, Titleable, CodeRepresentable, Hashable {
-
-    public static var allCases: [VariableType] = []
     
-    public var title: String = "TODO"
+    public static var allCases: [VariableType] { AALibrary.shared.values.map { $0.type } }
     
-    public init() { }
+    public let title: String
     
-    public var codeRepresentation: String { "TODO" }
-    
-    public var defaultView: any EditableVariableValue { fatalError() }
-    
+    public var codeRepresentation: String { title }
+        
     public var protoString: String { title }
+    
+    public init(title: String) {
+        self.title = title
+    }
+}
+
+extension VariableType {
+    public var editableType: (any EditableVariableValue.Type)? {
+        AALibrary.shared.values.first(where: { $0.type == self })
+    }
 }
