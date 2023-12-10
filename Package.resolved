@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "dylkit",
+      "kind" : "localSourceControl",
+      "location" : "/Users/dylan/Code/My Apps/DylKit",
+      "state" : {
+        "branch" : "master",
+        "revision" : "c7ce556e9217412a7439d440592787529d7141f0"
+      }
+    }
+  ],
+  "version" : 2
+}
