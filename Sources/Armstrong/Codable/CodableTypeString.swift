@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Armstrong
 
 func typeString(_ value: VariableValue.Type) -> String {
     String(describing: value).replacingOccurrences(of: "AppApp.", with: "")

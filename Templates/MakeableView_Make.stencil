@@ -1,0 +1,11 @@
+{% macro VariableTypeName type %}{% if type|annotated:"variableTypeName" %}{{ type.annotations.variableTypeName }}{% else %}{{ type.name|replace:"Value",""|replace:"Makeable",""|lowerFirstLetter }}{% endif %}{% endmacro %}
+
+{% for type in types.implementing.MakeableView|!protocol %}
+{% if type.kind != "protocolComposition" %}
+extension {{ type.name }} {
+    public func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping () -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        {{ type.name }}View(isRunning: isRunning, showEditControls: showEditControls, {%+ call VariableTypeName type +%}: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    }
+}
+{% endif %}
+{% endfor %}

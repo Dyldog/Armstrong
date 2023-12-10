@@ -1,23 +1,23 @@
 //
-//  CodableVariableValue.swift
+//  CodableMakeableView.swift
 //  AppApp
 //
-//  Created by Dylan Elliott on 24/11/2023.
+//  Created by Dylan Elliott on 29/11/2023.
 //
 
 import Foundation
 
-public struct CodableVariableValue {
+public struct CodableMakeableView {
     public let type: String
-    public let value: any EditableVariableValue
+    public let value: any MakeableView
     
-    public init(value: any EditableVariableValue) {
+    public init(value: any MakeableView) {
         self.value = value
         self.type = typeString(Swift.type(of: value))
     }
 }
 
-extension CodableVariableValue: Codable {
+extension CodableMakeableView: Codable {
     enum CodingKeys: String, CodingKey {
         case type
         case value
@@ -28,7 +28,7 @@ extension CodableVariableValue: Codable {
         
         let decodedType = try valueContainer.decode(String.self, forKey: .type)
         
-        for viewType in AALibrary.shared.values {
+        for viewType in AALibrary.shared.views {
             if typeString(viewType) == decodedType {
                 self.type = decodedType
                 self.value = try valueContainer.decode(viewType, forKey: .value)

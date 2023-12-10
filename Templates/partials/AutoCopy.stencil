@@ -1,0 +1,17 @@
+{% macro AutoCopy type %}
+    {% if type|!annotated:"skipCopying" %}
+extension {{ type.name }}: Copying {
+    public func copy() -> {{ type.name }} {
+    {% if type.implements.PickableValue %}
+        return self
+    {% else %}
+        return {{type.name}}(
+                {% for var in type.storedVariables where not var.defaultValue %}
+                    {{ var.name }}: {{ var.name }}{% if var.type.implements.Copying %}.copy() as! {{ var.typeName }}{% endif %}{{ "," if not forloop.last}}
+                {% endfor %}
+        )
+    {% endif %}
+    }
+}
+    {% endif %}
+{% endmacro %}

@@ -1,0 +1,66 @@
+
+{% macro EditableProperties type %}
+extension {{ type.name }} {
+     public enum Properties: String, ViewProperty {
+        {% for property in type.storedVariables %}
+            {% if not property.defaultValue %}
+        case {{ property.name }}
+            {% endif %}
+        {% endfor %}
+        
+        public var defaultValue: any EditableVariableValue {
+            switch self {
+        {% for property in type.storedVariables %}
+            {% if not property.defaultValue %}
+            case .{{ property.name }}: return {{ type.name }}.defaultValue{% if type.implements.CompositeEditableVariableValue %}(for: .{{ property.name }}){% endif %}
+            {% endif %}
+        {% endfor %}
+            }
+        }
+    }
+     
+    public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
+        .init(
+    {% for property in type.storedVariables %}
+        {% if not property.defaultValue %}
+            {{ property.name }}: factory(.{{ property.name }}) as! {{ property.typeName }}{{ ',' if not forloop.last }}
+        {% endif %}
+    {% endfor %}
+        )
+    }
+
+    public static func makeDefault() -> Self {
+        .init(
+    {% for property in type.storedVariables %}
+        {% if not property.defaultValue %}
+            {{ property.name }}: Properties.{{ property.name }}.defaultValue as! {{ property.typeName }}{{ ',' if not forloop.last }}
+        {% endif %}
+    {% endfor %}
+        )
+    }
+    
+    public func value(for property: Properties) -> any EditableVariableValue {
+    {% for property in type.storedVariables where not property.defaultValue %}
+        {% if forloop.first %}
+        switch property {
+        {% endif %}
+            case .{{ property.name }}: return {{ property.name }}
+        {% if forloop.last %}
+        }
+        {% endif %}
+    {% endfor %}
+    }
+
+    public func set(_ value: Any, for property: Properties) {
+    {% for property in type.storedVariables where not property.defaultValue %}
+        {% if forloop.first %}
+        switch property {
+        {% endif %}
+            case .{{ property.name }}: self.{{ property.name }} = value as! {{ property.typeName }}
+        {% if forloop.last %}
+        }
+        {% endif %}
+    {% endfor %}
+    }
+}
+{% endmacro %}

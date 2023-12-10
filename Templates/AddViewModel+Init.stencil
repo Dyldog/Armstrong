@@ -1,0 +1,15 @@
+extension AddViewViewModel {
+    convenience init(onSelect: @escaping (any MakeableView) -> Void) {
+        self.init(rows: [
+{% for type in types.implementing.MakeableView|!protocol %}
+        {% if type.kind != "protocolComposition" %}
+
+            .init(title: "{{ type.name|replace:"Makeable","" }}", onTap: {
+                onSelect({{ type.name }}.makeDefault())
+            }){{ ',' if not forloop.last }}
+        {% endif %}
+{% endfor %}
+        ])
+    }
+}
+

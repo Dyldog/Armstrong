@@ -1,0 +1,52 @@
+
+{% import "partials/VariableTypeExtension.stencil" %}
+{% import "partials/AutoCopy.stencil" %}
+
+{% macro ValueTypeName type %}{{ type.name|replace:".", "" }}{% endmacro %}
+{% macro ValueTypeTypeName type %}{{ type.name|replace:".", ""|lowerFirstLetter }}{% endmacro %}
+
+{% for type in types.implementing.PickableValue %}
+public final class {% call ValueTypeName type %}Value: PrimitiveEditableVariableValue, Codable, Copying {
+
+    public static var type: VariableType { .{% call ValueTypeTypeName type %} }
+    public static var defaultValue: {{ type.name }} { .defaultValue }
+    public var value: {{ type.name }}
+    
+    public init(value: {{ type.name }}) {
+        self.value = value
+    }
+    
+    public static func makeDefault() -> {% call ValueTypeName type %}Value {
+        .init(value: defaultValue)
+    }
+    
+    public func add(_ other: VariableValue) throws -> VariableValue {
+        throw VariableValueError.variableCannotPerformOperation(Self.type, "add")
+    }
+    
+    public var protoString: String { "\(value.title)" }
+    
+    public var valueString: String { protoString }
+    
+    public func value(with variables: Variables) async throws -> VariableValue {
+        self
+    }
+    
+    public func copy() -> {% call ValueTypeName type %}Value {
+        .init(
+            value: value
+        )
+    }
+}
+
+extension {% call ValueTypeName type %}Value: CodeRepresentable {
+    public var codeRepresentation: String {
+        value.codeRepresentation
+    }
+}
+
+{% call AutoCopy type %}
+
+{% call VariableTypeExtension type %}
+
+{% endfor %}

@@ -1,0 +1,18 @@
+{% import "partials/AutoCopy.stencil" %}
+{% import "partials/EditableProperties.stencil" %}
+{% import "partials/VariableTypeExtension.stencil" %}
+
+{% for type in types.implementing.EditableVariableValue|!protocol %}
+// {{ type.name }}
+
+{%+ call AutoCopy type +%}
+
+{% if type.implements.CompositeEditableVariableValue and type|!annotated:"skipVariableType" %}
+{%+ call EditableProperties type +%}
+{% endif %}
+
+{% if type|!annotated:"skipVariableType" %}
+{%+ call VariableTypeExtension type +%}
+{% endif %}
+
+{% endfor %}

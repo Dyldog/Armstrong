@@ -1,0 +1,5 @@
+sources:
+  - .
+templates:
+  - ../../Templates
+output: Generated.swift

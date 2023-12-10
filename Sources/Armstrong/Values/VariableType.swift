@@ -18,4 +18,6 @@ public struct VariableType: CaseIterable, Equatable, Codable, Titleable, CodeRep
     public var codeRepresentation: String { "TODO" }
     
     public var defaultView: any EditableVariableValue { fatalError() }
+    
+    public var protoString: String { title }
 }

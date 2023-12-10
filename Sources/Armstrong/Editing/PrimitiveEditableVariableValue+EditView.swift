@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension PrimitiveEditableVariableValue {
+public extension PrimitiveEditableVariableValue {
     func editView(title: String, onUpdate: @escaping (Self) -> Void) -> AnyView {
         Picker("", selection: .init(get: { [weak self] in
             self?.value ?? Self.makeDefault().value

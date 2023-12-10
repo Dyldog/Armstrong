@@ -1,0 +1,63 @@
+{% import "partials/AutoCopy.stencil" %}
+{% import "partials/VariableTypeExtension.stencil" %}
+
+{% macro ValueTypeName type %}{{ type.name|replace:".", "" }}{% endmacro %}
+{% macro ValueTypeTypeName type %}{{ type.name|replace:".", ""|lowerFirstLetter }}{% endmacro %}
+
+{% for type in types.implementing.StringRepresentableValue %}
+public final class {{ type.name }}Value: EditableVariableValue, Codable, Copying, NumericValue {
+    
+    public static var type: VariableType { .{% call ValueTypeTypeName type %} }
+    public var value: {{ type.name }}
+    public static var defaultValue: {{ type.name }} = .defaultValue
+    
+    public init(value: {{ type.name }}) {
+        self.value = value
+    }
+    
+    public static func makeDefault() -> {{ type.name }}Value {
+        .init(value: Self.defaultValue)
+    }
+    
+    public func editView(title: String, onUpdate: @escaping ({{ type.name }}Value) -> Void) -> AnyView {
+        TextField("", text: .init(get: { [weak self] in
+            self?.protoString ?? "ERROR"
+        }, set: { [weak self] in
+            guard let self = self else { return }
+            self.value = {{ type.name }}($0) ?? self.value
+            onUpdate(self)
+        })).any
+    }
+    
+    public func add(_ other: VariableValue) throws -> VariableValue {
+        guard let other = other as? {{ type.name }}Value else { throw VariableValueError.wrongTypeForOperation }
+        self.value = self.value + other.value
+        return self
+    }
+    
+    public var protoString: String { "\(value)" }
+    
+    public var valueString: String { "\(value)"}
+    
+    public func value(with variables: Variables) throws -> VariableValue {
+        self
+    }
+    
+    public func copy() -> {% call ValueTypeName type %}Value {
+        .init(
+            value: value
+        )
+    }
+}
+
+extension {% call ValueTypeName type %}Value: CodeRepresentable {
+    public var codeRepresentation: String {
+        "\(value)"
+    }
+}
+
+{% call AutoCopy type %}
+
+{% call VariableTypeExtension type %}
+
+{% endfor %}

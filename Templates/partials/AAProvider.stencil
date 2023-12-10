@@ -1,0 +1,41 @@
+{% macro PickableValueTypeName type %}{{ type.name|replace:".", "" }}{% endmacro %}
+
+{% macro AutoProvider module %}
+public class {{ module }}: AAProvider {
+    public static var steps: [any StepType.Type] {
+    [
+    {% for type in types.implementing.StepType|!protocol %}
+        {{ type.name }}.self{{ "," if not forloop.last}}
+    {% endfor %}
+    ]
+    }
+    
+    public static var values: [any EditableVariableValue.Type] {
+    [
+    {% for type in types.implementing.VariableValue|!protocol %}
+    {% if type|!annotated:"skipVariableType" %}
+    {{ type.name }}.self,
+    {% endif %}
+    {% endfor %}
+    {% for type in types.implementing.StringRepresentableValue|!protocol %}
+    {% if type|!annotated:"skipVariableType" %}
+    {{ type.name }}Value.self,
+    {% endif %}
+    {% endfor %}
+    {% for type in types.implementing.PickableValue %}
+    {% call PickableValueTypeName type %}Value.self{{ "," if not forloop.last}}
+    {% endfor %}
+    ]
+    }
+    
+    public static var views: [any MakeableView.Type] {
+    [
+    {% for type in types.implementing.MakeableView|!protocol %}
+    {% if type.kind != "protocolComposition" %}
+    {{ type.name }}.self{{ "," if not forloop.last}}
+    {% endif %}
+    {% endfor %}
+    ]
+    }
+}
+{% endmacro %}
