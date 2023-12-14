@@ -1,9 +1,0 @@
-{% macro VariableTypeTitle type %}{{ type.name|replace:"Value",""|replace:".",""|replace:"Makeable",""|upperFirstLetter }}{% endmacro %}
-
-{% macro VariableTypeName type %}{% if type|annotated:"variableTypeName" %}{{ type.annotations.variableTypeName }}{% else %}{{ type.name|replace:"Value",""|replace:".",""|replace:"Makeable",""|lowerFirstLetter }}{% endif %}{% endmacro %}
-
-{% macro VariableTypeExtension type %}
-extension VariableType {
-    static var {%+ call VariableTypeName type +%}: VariableType { .init(title: "{%+ call VariableTypeTitle type +%}") } // {{ type.name }}
-}
-{% endmacro %}

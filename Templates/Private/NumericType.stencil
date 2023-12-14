@@ -1,0 +1,25 @@
+public enum NumericType: String, Codable, CaseIterable {
+    public static var defaultValue: NumericType = .int
+    
+    public var title: String { rawValue.capitalized }
+
+{% for type in types.implementing.StringRepresentableValue %}
+    case {{ type.name|lowercase }}
+{% endfor %}
+    
+    public func make(from string: String) throws -> any VariableValue {
+        switch self {
+{% for type in types.implementing.StringRepresentableValue %}
+        case .{{ type.name|lowercase }}:
+            guard let value = {{ type.name }}(string) else { throw VariableValueError.wrongTypeForOperation }
+            return {{ type.name }}Value(value: value)
+{% endfor %}
+        }
+    }
+}
+
+extension NumericType: CodeRepresentable {
+    public var codeRepresentation: String {
+        title
+    }
+}

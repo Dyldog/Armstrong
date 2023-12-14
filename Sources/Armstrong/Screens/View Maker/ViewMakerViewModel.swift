@@ -12,7 +12,11 @@ import Combine
 @MainActor
 public class ViewMakerViewModel: ObservableObject {
     let name: String
-    var content: MakeableStack = .init(content: .init(value: [], axis: .init(value: .vertical))) {
+    
+    var content: MakeableStack {
+        willSet {
+            objectWillChange.send()
+        }
         didSet {
             onUpdate?(.init(id: screenID, name: self.name, initActions: self.initActions, content: content))
         }
@@ -59,7 +63,17 @@ public class ViewMakerViewModel: ObservableObject {
         print(screen.codeRepresentation)
         
         Task { @MainActor in
-            _variables = await makeVariables()
+            do {
+                try await self.makeNewVariables()
+            } catch {
+                if let error = error as? VariableValueError {
+                    self.error = error
+                } else {
+                    print("Unhandled error: \(error)")
+                }
+                
+                self.hasFinishedFirstLoad = true
+            }
         }
         
         _variables.objectWillChange.sink { [weak self] _ in
@@ -68,7 +82,15 @@ public class ViewMakerViewModel: ObservableObject {
         
         $makeMode.dropFirst().sink { [weak self] _ in
             Task {
-                await self?.makeNewVariables()
+                do {
+                    try await self?.makeNewVariables()
+                } catch {
+                    if let error = error as? VariableValueError {
+                        self?.error = error
+                    } else {
+                        print("Unhandled error: \(error)")
+                    }
+                }
             }
         }.store(in: &cancellables)
         
@@ -83,8 +105,9 @@ public class ViewMakerViewModel: ObservableObject {
 //        }.store(in: &cancellables)
     }
     
-    private func updateVariablesFromContent(vars: Variables) async {
-        for element in content.content {
+    private func updateVariablesFromContent(vars: Variables) async throws {
+        for element in (try await content.content.value(with: vars) as ArrayValue).elements {
+            guard let element = element as? (any MakeableView) else { return }
             try? await element.insertValues(into: vars)
         }
         
@@ -93,11 +116,11 @@ public class ViewMakerViewModel: ObservableObject {
 //        self.updater += 1
     }
     
-    func makeNewVariables() async {
-        self._variables = await self.makeVariables()
+    func makeNewVariables() async throws {
+        self._variables = try await self.makeVariables()
     }
     
-    func makeVariables()  async -> Variables {
+    func makeVariables() async throws -> Variables {
         let newVars = Variables()
         
         for action in initActions {
@@ -108,7 +131,11 @@ public class ViewMakerViewModel: ObservableObject {
             }
         }
         
-        await self.updateVariablesFromContent(vars: newVars)
+        variables.removeReturnVariable()
+        
+        try await self.updateVariablesFromContent(vars: newVars)
+        
+        variables.removeReturnVariable()
         
         hasFinishedFirstLoad = true
         
@@ -117,14 +144,14 @@ public class ViewMakerViewModel: ObservableObject {
     
     func onRuntimeUpdate() {
         Task { @MainActor in
-            await self.updateVariablesFromContent(vars: variables)
+            try await self.updateVariablesFromContent(vars: variables)
         }
     }
     
     func updateInitActions(_ newValue: StepArray) {
         Task { @MainActor in
             self.initActions = newValue
-            await makeNewVariables()
+            try await makeNewVariables()
             onUpdate?(.init(id: screenID, name: self.name, initActions: self.initActions, content: self.content))
         }
     }

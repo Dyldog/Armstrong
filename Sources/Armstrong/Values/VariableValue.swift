@@ -21,7 +21,7 @@ public extension VariableValue {
     func value<T>(with variables: Variables, of type: T.Type = T.self) async throws -> T {
         let value: VariableValue = try await value(with: variables)
         guard let castValue = value as? T else {
-            throw VariableValueError.wrongTypeForOperation
+             throw VariableValueError.wrongTypeForOperation
         }
         return castValue
     }

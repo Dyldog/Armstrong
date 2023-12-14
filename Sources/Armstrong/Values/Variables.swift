@@ -55,6 +55,10 @@ public final class Variables: Equatable, ObservableObject, Hashable, Identifiabl
             values: variables.mapValues { $0.copy() }
         )
     }
+    
+    @MainActor public func removeReturnVariable() {
+        variables.removeValue(forKey: "$0")
+    }
 }
 
 private extension Variables {

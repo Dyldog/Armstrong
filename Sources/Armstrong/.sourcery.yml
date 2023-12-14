@@ -1,5 +1,6 @@
 sources:
   - .
 templates:
-  - ../../Templates
+  - ../../Templates/Shared
+  - ../../Templates/Private
 output: Generated.swift

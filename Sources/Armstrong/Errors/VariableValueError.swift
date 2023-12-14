@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum VariableValueError: LocalizedError, Identifiable {
+public enum VariableValueError: LocalizedError, Identifiable, Equatable {
     public var id: String { localizedDescription }
     case wrongTypeForOperation
     case valueNotFoundForVariable(String)
