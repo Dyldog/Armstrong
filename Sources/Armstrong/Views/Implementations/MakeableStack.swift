@@ -166,7 +166,7 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
     }
     
     public func insertValues(into variables: Variables) async throws {
-        for element in (try await content.value(with: variables) as ArrayValue).elements {
+        for element in try content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
             try await element.insertValues(into: variables)
         }
