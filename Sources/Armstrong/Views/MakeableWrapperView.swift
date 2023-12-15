@@ -10,7 +10,7 @@ import SwiftUI
 public struct MakeableWrapperView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    @State var view: any MakeableView
+    var view: any MakeableView
     let onContentUpdate: (any MakeableView) -> Void
     let onRuntimeUpdate: () -> Void
     @Binding var error: VariableValueError?

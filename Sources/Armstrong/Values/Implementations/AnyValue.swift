@@ -18,7 +18,7 @@ public final class AnyValue: EditableVariableValue {
         if let value = value as? AnyValue {
             self.value = value.value
         } else {
-            self.value = value.copy()
+            self.value = value
         }
     }
     

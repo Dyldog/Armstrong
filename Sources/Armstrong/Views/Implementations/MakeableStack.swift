@@ -11,7 +11,7 @@ import DylKit
 public struct MakeableStackView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    let stack: MakeableStack
+    @ObservedObject var stack: MakeableStack
     
     let onContentUpdate: (MakeableStack) -> Void
     let onRuntimeUpdate: () -> Void
@@ -63,11 +63,16 @@ public struct MakeableStackView: View {
         }
         .task(id: variables.hashValue) {
             do {
-                let array = try await stack.content.value(with: variables) as ArrayValue
-                print(array.elements.map {
-                    "\(type(of: $0).type.title)"
-                }.joined(separator:", "))
-                self.elements = array.elements.compactMap { $0 as! (any MakeableView) }
+                switch stack.content.value {
+                case let .constant(array):
+                    self.elements = array.elements.compactMap { $0 as! (any MakeableView) }
+                default:
+                    if isRunning {
+                        self.elements = try await stack.content.value(with: variables)
+                    } else {
+                        self.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
+                    }
+                }
             } catch is VariableValueError {
                 self.error = error
             } catch {
@@ -83,28 +88,30 @@ public struct MakeableStackView: View {
         }
         .sheet(item: $showAddIndex, content: { index in
             AddViewView(viewModel: .init(onSelect: { view in
-                elements?.append(view)
-                stack.content = .value(.init(
-                    type: .base,
-                    elements: elements ?? []
-                ))
+                guard let elements = stack.content.value.constant else { return }
+                elements.elements.append(view)
+                stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
             }))
         }).sheet(item: $showEditIndex, content: { index in
-            EditViewView(viewModel: .init(editable: elements![index]) {
+            let elements = stack.content.value.constant!
+            EditViewView(viewModel: .init(editable: elements.elements[index] as! (any MakeableView)) {
                 onUpdate(at: index, with: $0)
             })
         })
     }
     
     private func onRemove(at index: Int) {
-        elements?.remove(at: index)
+        guard let elements = stack.content.value.constant else { return }
+        elements.elements.remove(at: index)
+        stack.content = .value(elements)
         onContentUpdate(stack)
     }
     private func onUpdate(at index: Int, with value: any MakeableView) {
-        elements?[index] = value
-        stack.content = .value(.init(type: .base, elements: elements!))
+        guard let elements = stack.content.value.constant else { return }
+        elements.elements[index] = value
+        stack.content = .value(elements)
         onContentUpdate(stack)
     }
     
@@ -117,15 +124,15 @@ public struct MakeableStackView: View {
     }
 }
 
-public final class MakeableStack: MakeableView, Codable {
+public final class MakeableStack: MakeableView, Codable, ObservableObject {
     public static var type: VariableType { .stack }
     
     public var valueString: String { "STACK" }
-    public var protoString: String { content.protoString }
+    public var protoString: String { "STACK(\(content.protoString))" }
     
-    public var base: MakeableBase
-    public var axis: AxisValue
-    public var content: TypedValue<ArrayValue>
+    public var base: MakeableBase { willSet { objectWillChange.send() } }
+    public var axis: AxisValue { willSet { objectWillChange.send() } }
+    public var content: TypedValue<ArrayValue> { willSet { objectWillChange.send() } }
     
     public init(base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), content: TypedValue<ArrayValue>) {
         self.base = base
@@ -138,12 +145,11 @@ public final class MakeableStack: MakeableView, Codable {
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
-//        MakeableStack(
-//            base: try await base.value(with: variables),
-//            axis: try await axis.value(with: variables),
-//            content: .value(try await content.value(with: variables))
-//        )
-        self
+        MakeableStack(
+            base: try await base.value(with: variables),
+            axis: try await axis.value(with: variables),
+            content: .value(try await content.value(with: variables))
+        )
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue { fatalError() }
@@ -175,6 +181,10 @@ extension MakeableStack: CodeRepresentable {
 
 extension MakeableStack {
     public convenience init(axis: Axis = .vertical, _ elements: [any MakeableView]) {
-        self.init(base: .makeDefault(), content: .value(.init(type: .base, elements: elements)))
+        self.init(
+            base: .makeDefault(),
+            axis: .init(value: axis),
+            content: .value(.init(type: .base, elements: elements))
+        )
     }
 }

@@ -106,7 +106,7 @@ public class ViewMakerViewModel: ObservableObject {
     }
     
     private func updateVariablesFromContent(vars: Variables) async throws {
-        for element in (try await content.content.value(with: vars) as ArrayValue).elements {
+        for element in content.content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
             try? await element.insertValues(into: vars)
         }
@@ -131,11 +131,11 @@ public class ViewMakerViewModel: ObservableObject {
             }
         }
         
-        variables.removeReturnVariable()
+        newVars.removeReturnVariable()
         
         try await self.updateVariablesFromContent(vars: newVars)
         
-        variables.removeReturnVariable()
+        newVars.removeReturnVariable()
         
         hasFinishedFirstLoad = true
         
