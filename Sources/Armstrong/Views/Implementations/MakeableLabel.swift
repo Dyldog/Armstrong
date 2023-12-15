@@ -115,7 +115,7 @@ public final class MakeableLabel: MakeableView {
     
     public func insertValues(into variables: Variables) throws { }
     
-    public var protoString: String { text.protoString }
+    public var protoString: String { "LABEL(\(text.protoString))" }
     
     public func add(_ other: VariableValue) throws -> VariableValue { fatalError() }
     

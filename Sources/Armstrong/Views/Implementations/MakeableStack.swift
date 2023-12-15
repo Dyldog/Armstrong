@@ -68,7 +68,7 @@ public struct MakeableStackView: View {
                     self.elements = array.elements.compactMap { $0 as! (any MakeableView) }
                 default:
                     if isRunning {
-                        self.elements = try await stack.content.value(with: variables)
+                        self.elements = (try await stack.content.value(with: variables) as ArrayValue).elements.compactMap { $0 as? any MakeableView }
                     } else {
                         self.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
                     }
