@@ -34,7 +34,7 @@ public final class MakeableBase: MakeableView, Codable {
     public static func defaultValue(for property: Properties) -> any EditableVariableValue {
         switch property {
         case .padding: return IntValue.init(value: 5)
-        case .backgroundColor: return ColorValue(value: .white) // .clear) TODO: Some issue decoding clear
+        case .backgroundColor: return ColorValue(value: .clear) // .clear) TODO: Some issue decoding clear
         case .cornerRadius: return IntValue(value: 0)
         }
     }

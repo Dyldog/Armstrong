@@ -9,5 +9,5 @@ import SwiftUI
 
 public protocol EditableVariableValue: AnyObject, VariableValue, ViewEditable {
     static func makeDefault() -> Self
-    func editView(title: String, onUpdate: @escaping (Self) -> Void) -> AnyView
+    func editView(scope: Scope, title: String, onUpdate: @escaping (Self) -> Void) -> AnyView
 }

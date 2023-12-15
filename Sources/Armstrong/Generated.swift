@@ -232,9 +232,9 @@ public final class FloatValue: EditableVariableValue, Codable, Copying, NumericV
     public static func makeDefault() -> FloatValue {
         .init(value: Self.defaultValue)
     }
-    public func editView(title: String, onUpdate: @escaping (FloatValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (FloatValue) -> Void) -> AnyView {
         HStack {
-            Text(title.capitalized).bold()
+            Text(title.capitalized).bold().scope(scope)
             Spacer()
             TextField("", text: .init(get: { [weak self] in
                 self?.protoString ?? "ERROR"
@@ -243,6 +243,8 @@ public final class FloatValue: EditableVariableValue, Codable, Copying, NumericV
                 self.value = Float($0) ?? self.value
                 onUpdate(self)
             }))
+            .multilineTextAlignment(.trailing)
+            .scope(scope)
         }.any
     }
     public func add(_ other: VariableValue) throws -> VariableValue {
@@ -289,9 +291,9 @@ public final class IntValue: EditableVariableValue, Codable, Copying, NumericVal
     public static func makeDefault() -> IntValue {
         .init(value: Self.defaultValue)
     }
-    public func editView(title: String, onUpdate: @escaping (IntValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (IntValue) -> Void) -> AnyView {
         HStack {
-            Text(title).bold()
+            Text(title.capitalized).bold().scope(scope)
             Spacer()
             TextField("", text: .init(get: { [weak self] in
                 self?.protoString ?? "ERROR"
@@ -300,6 +302,8 @@ public final class IntValue: EditableVariableValue, Codable, Copying, NumericVal
                 self.value = Int($0) ?? self.value
                 onUpdate(self)
             }))
+            .multilineTextAlignment(.trailing)
+            .scope(scope)
         }.any
     }
     public func add(_ other: VariableValue) throws -> VariableValue {

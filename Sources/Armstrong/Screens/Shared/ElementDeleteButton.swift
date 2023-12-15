@@ -9,8 +9,10 @@ import SwiftUI
 
 public struct ElementDeleteButton: View {
     let action: () -> Void
+    let color: Color
     
-    public init(action: @escaping () -> Void) {
+    public init(color: Color = .gray, action: @escaping () -> Void) {
+        self.color = color
         self.action = action
     }
     
@@ -25,10 +27,12 @@ public struct ElementDeleteButton: View {
                 .padding(4)
                 .background(
                     Circle()
-                        .foregroundStyle(.gray).brightness(-0.05)
+                        .foregroundStyle(color)
                 )
                 .foregroundStyle(.white.opacity(0.8))
-                .padding(4)
+                .padding(.vertical, 4)
+                .padding(.leading, 4)
+                .fixedSize()
         }
     }
 }

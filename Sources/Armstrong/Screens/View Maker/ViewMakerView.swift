@@ -53,7 +53,7 @@ public struct ViewMakerView: View {
                         SheetButton(title: { Text("Init Actions") }) {
                             NavigationView {
                                 ScrollView {
-                                    ActionListView(title: "Init Actions", steps: viewModel.initActions.value, onUpdate: {
+                                    ActionListView(scope: .init(), title: "Init Actions", steps: viewModel.initActions.value, onUpdate: {
                                         viewModel.updateInitActions(.init(value: $0))
                                     })
                                     .padding()

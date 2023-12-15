@@ -24,8 +24,8 @@ public final class ResultValue: EditableVariableValue {
         .init(steps: .init(value: []))
     }
     
-    public func editView(title: String, onUpdate: @escaping (ResultValue) -> Void) -> AnyView {
-        steps.editView(title: title) { [weak self] in
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (ResultValue) -> Void) -> AnyView {
+        steps.editView(scope: scope, title: title) { [weak self] in
             guard let self = self else { return }
             self.steps = $0
             onUpdate(self)

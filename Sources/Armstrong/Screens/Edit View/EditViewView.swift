@@ -36,7 +36,7 @@ struct EditViewView: View {
                         .any
                         
                         ScrollView {
-                            viewModel.editable.editView(title: "Edit View") {
+                            viewModel.editable.editView(scope: .init(), title: "Edit View") {
                                 viewModel.editable = $0
                                 update += 1
                             }

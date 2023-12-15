@@ -9,13 +9,15 @@ import SwiftUI
 import DylKit
 
 public struct EditVariableView: View {
+    let scope: Scope
     let name: String
     @State var selectedTypeIndex: Int
     var selectedType: any EditableVariableValue.Type { AALibrary.shared.values[selectedTypeIndex] }
     @State var value: any EditableVariableValue
     let onUpdate: (any EditableVariableValue) -> Void
     
-    public init(name: String, value: any EditableVariableValue, onUpdate: @escaping (any EditableVariableValue) -> Void) {
+    public init(scope: Scope, name: String, value: any EditableVariableValue, onUpdate: @escaping (any EditableVariableValue) -> Void) {
+        self.scope = scope
         self._value = .init(initialValue: value)
         self.onUpdate = onUpdate
         self.selectedTypeIndex = AALibrary.shared.values.firstIndex { $0.type == type(of: value).type } ?? 0
@@ -25,25 +27,20 @@ public struct EditVariableView: View {
     public var body: some View {
         VStack {
             HStack {
-                Text("Type")
+                Text("Type").bold().scope(scope)
                 Spacer()
                 Picker("Type", selection: $selectedTypeIndex) {
                     ForEach(enumerated: AALibrary.shared.values) { (index, element) in
                         Text(element.type.title).tag(index)
                     }
-                }.pickerStyle(.menu)
+                }
+                .pickerScope(scope)
             }
             
-            HStack {
-                if !(value is any CompositeEditableVariableValue) {
-                    Text("Value")
-                    Spacer()
-                }
-                value.editView(title: name, onUpdate: {
-                    self.value = $0
-                    onUpdate($0)
-                })
-            }
+            value.editView(scope: scope, title: "Value", onUpdate: {
+                self.value = $0
+                onUpdate($0)
+            })
         }
         .buttonStyle(.plain)
         .navigationTitle(name)

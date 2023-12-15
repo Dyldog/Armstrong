@@ -9,51 +9,45 @@ import SwiftUI
 import DylKit
 
 struct ListEditView: View {
+    let scope: Scope
     let title: String
     @Binding var value: ArrayValue
     let onUpdate: (ArrayValue) -> Void
     
     var body: some View {
-        NavigationView {
-            ScrollView {
+        VStack {
+            HStack {
+                Text("Type")
+                    .bold()
+                    .scope(scope)
+                
+                Spacer()
+                value.type.editView(scope: scope, title: "\(title)[type]", onUpdate: {
+                    value.type = $0
+                    value.elements = []
+                    onUpdate(value)
+                })
+            }
+            
+            addButton(index: 0)
+            
+            ForEach(enumerated: value.elements) { (index, element) in
                 HStack {
-                    Text("Type")
-                    Spacer()
-                    value.type.editView(title: "\(title)[type]", onUpdate: {
-                        value.type = $0
-                        value.elements = []
-                        onUpdate(value)
-                    })
-                }
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.white))
-                .padding()
-                
-                addButton(index: 0)
-                
-                ForEach(enumerated: value.elements) { (index, element) in
-                    HStack {
-                        VStack {
-                            element.editView(title: "\(title)[\(index)]") { editedElement in
-                                value.elements[index] = editedElement
-                                onUpdate(value)
-                            }
-                        }
-                        
-                        ElementDeleteButton {
-                            remove(at: index)
+                    VStack {
+                        element.editView(scope: scope.next, title: "\(title)[\(index)]") { editedElement in
+                            value.elements[index] = editedElement
+                            onUpdate(value)
                         }
                     }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.white))
-                    .padding()
                     
-                    addButton(index: index + 1)
+                    ElementDeleteButton(color: scope.next.color) {
+                        remove(at: index)
+                    }
                 }
-                .multilineTextAlignment(.center)
+                
+                addButton(index: index + 1)
             }
-            .navigationTitle(title)
-            .background(.gray.opacity(0.1))
+            .multilineTextAlignment(.center)
         }
     }
     
@@ -69,8 +63,9 @@ struct ListEditView: View {
             
             onUpdate(value)
         } label: {
-            Image(systemName: "plus.app.fill").foregroundStyle(.blue)
+            Image(systemName: "plus.app.fill").scope(scope)
         }
+        .padding(4)
     }
     
     func remove(at index: Int) {

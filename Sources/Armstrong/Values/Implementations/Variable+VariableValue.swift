@@ -36,13 +36,12 @@ public final class Variable: EditableVariableValue {
         return try await value.value(with: variables)
     }
     
-    public func editView(title: String, onUpdate: @escaping (Variable) -> Void) -> AnyView {
-        self.value.editView(title: title) { [weak self] value in
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (Variable) -> Void) -> AnyView {
+        self.value.editView(scope: scope, title: title) { [weak self] value in
             guard let self else { return }
             self.value = value
             onUpdate(self)
         }
-        .multilineTextAlignment(.trailing)
         .any
     }
 }

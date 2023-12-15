@@ -43,14 +43,21 @@ public final class BoolValue: EditableVariableValue, Codable {
         self
     }
     
-    public func editView(title: String, onUpdate: @escaping (BoolValue) -> Void) -> AnyView {
-        Toggle("", isOn: .init(get: { [weak self] in
-            self?.value ?? false
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = $0
-            onUpdate(self)
-        })).any
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (BoolValue) -> Void) -> AnyView {
+        HStack {
+            Text(title).bold().scope(scope)
+            Spacer()
+            Toggle("", isOn: .init(get: { [weak self] in
+                self?.value ?? false
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = $0
+                onUpdate(self)
+            }))
+            .scope(scope)
+        }
+        .tint(scope.color)
+        .any
     }
 }
 

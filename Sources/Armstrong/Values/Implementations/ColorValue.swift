@@ -24,9 +24,9 @@ public final class ColorValue: EditableVariableValue {
         .init(value: .blue)
     }
     
-    public func editView(title: String, onUpdate: @escaping (ColorValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (ColorValue) -> Void) -> AnyView {
         HStack {
-            Text(title).bold()
+            Text(title).bold().scope(scope)
             Spacer()
             ColorPicker("Set the background color", selection: .init(get: { [weak self] in
                 self?.value ?? .blue

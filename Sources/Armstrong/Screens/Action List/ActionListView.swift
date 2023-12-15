@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ActionListView: View {
+    let scope: Scope
     let title: String
     @State var showAddIndex: Int?
     @State var steps: [any StepType]
@@ -18,17 +19,19 @@ struct ActionListView: View {
             addButton(index: 0)
             
             ForEach(enumerated: steps) { (index, element) in
-                VStack {
+                VStack(spacing: 0) {
                     HStack {
-                        Text(type(of: element).title).bold().foregroundStyle(.gray).brightness(-0.2)
+                        Text(type(of: element).title)
+                            .bold()
+                            .scope(scope.next)
                         
-                        ElementDeleteButton {
+                        ElementDeleteButton(color: scope.next.color) {
                             steps = steps.removing(at: index)
                             onUpdate(steps)
                         }
                     }
                     
-                    element.editView(title: title) { value in
+                    element.editView(scope: scope.next, title: title) { value in
                         onUpdate(steps.replacing(value, at: index))
                     }
                     .buttonStyle(.plain)
@@ -56,5 +59,6 @@ struct ActionListView: View {
             Image(systemName: "plus.app.fill")
         }
         .padding(4)
+        .scope(scope)
     }
 }

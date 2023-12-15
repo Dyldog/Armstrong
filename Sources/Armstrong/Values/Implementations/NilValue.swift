@@ -24,7 +24,7 @@ public final class NilValue: EditableVariableValue {
         .init()
     }
     
-    public func editView(title: String, onUpdate: @escaping (NilValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (NilValue) -> Void) -> AnyView {
         Text(protoString).any
     }
     

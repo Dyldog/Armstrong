@@ -36,18 +36,19 @@ import SwiftUI
 
 struct ExpandableValueView<T: EditableVariableValue>: View {
     
+    let scope: Scope
     let title: String
     let value: T
     let onUpdate: (T) -> Void
     var body: some View {
-        ExpandableStack(title: title) {
+        ExpandableStack(scope: scope, title: title) {
             HStack {
                 Text(value.protoString)
             }
         } content: {
-            value.editView(title: title) { value in
+            value.editView(scope: scope, title: title) { value in
                 onUpdate(value)
-            }.multilineTextAlignment(.trailing)
+            }
         }
     }
 }

@@ -67,10 +67,10 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         return self
     }
     
-    public func editView(title: String, onUpdate: @escaping (DictionaryValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (DictionaryValue) -> Void) -> AnyView {
         VStack {
             Text(protoString)
-            DictionaryEditView(title: title, value: .init(get: {
+            DictionaryEditView(scope: scope, title: title, value: .init(get: {
                 self
             }, set: {
                 self.elements = $0.elements

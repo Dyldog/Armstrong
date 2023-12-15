@@ -124,15 +124,15 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable 
         try await value.value.value(with: variables)
     }
     
-    public func editView(title: String, onUpdate: @escaping (TypedValue<T>) -> Void) -> AnyView {
-        return ExpandableStack(title: title) {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (TypedValue<T>) -> Void) -> AnyView {
+        return ExpandableStack(scope: scope, title: title) { [weak self] in
             HStack {
-                Text(self.protoString)
+                ProtoText(text: self?.protoString ?? "")
             }
         } content: {
             VStack {
                 HStack {
-                    Text("Type").bold()
+                    Text("Type").bold().scope(scope.next)
                     Spacer()
                     Picker("Type", selection: .init(get: { [weak self] in
                         self?.value.type ?? .constant
@@ -144,10 +144,12 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable 
                         ForEach(TypedValueOptionType.allCases) {
                             Text($0.title).tag($0)
                         }
-                    }.pickerStyle(.menu).any
+                    }
+                    .pickerScope(scope.next)
+                    .any
                 }
                 
-                self.value.value.editView(title: "Value") { [weak self] in
+                self.value.value.editView(scope: scope.next, title: "Value") { [weak self] in
                     guard let self else { return }
                     switch self.value.type {
                     case .constant:
@@ -161,8 +163,10 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable 
                         self.value = .result(resultValue)
                     }
                     onUpdate(self)
-                }.multilineTextAlignment(.trailing)
+                }
             }
+            .tint(scope.color)
+            .foregroundStyle(scope.color)
         }
         .any
     }

@@ -33,10 +33,10 @@ public final class AnyMakeableView: EditableVariableValue {
         try await value.value(with: variables)
     }
     
-    public func editView(title: String, onUpdate: @escaping (AnyMakeableView) -> Void) -> AnyView {
-        VStack {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (AnyMakeableView) -> Void) -> AnyView {
+        VStack(spacing: 0) {
             HStack {
-                Text("type")
+                Text("Type").bold().scope(scope)
                 Spacer()
                 Picker("", selection: .init(get: {
                     HashableBox(Swift.type(of: self.value), hash: { $0.type })
@@ -47,10 +47,12 @@ public final class AnyMakeableView: EditableVariableValue {
                     ForEach(AALibrary.shared.views.map { $0.type }) {
                         Text($0.title).tag($0)
                     }
-                }.pickerStyle(.menu).any
+                }
+                .pickerScope(scope)
+                .any
             }
             
-            value.editView(title: "\(title)[value]") {[weak self] in
+            value.editView(scope: scope, title: "\(title)[value]") {[weak self] in
                 guard let self = self else { return }
                 self.value = $0
                 onUpdate(self)

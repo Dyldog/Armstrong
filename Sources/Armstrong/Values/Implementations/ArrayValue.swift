@@ -16,7 +16,11 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
     public var type: VariableType
     public var elements: [any EditableVariableValue]
     
-    public var protoString: String { "[" + elements.map { $0.protoString }.joined(separator: ", ") + "]" }
+    public var protoString: String { """
+    [
+    \(elements.map { "\t• " + $0.protoString }.joined(separator: ",\n"))
+    ]
+    """ }
     
     public init(type: VariableType, elements: [any EditableVariableValue]) {
         self.type = type
@@ -55,18 +59,20 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
         }
     }
     
-    public func editView(title: String, onUpdate: @escaping (ArrayValue) -> Void) -> AnyView {
-        VStack {
-            Text(protoString)
-            ListEditView(title: title, value: .init(get: { [weak self] in
-                self ?? .init(type: .int, elements: [IntValue(value: 666)])
-            }, set: {
-                self.elements = $0.elements
-            }), onUpdate: {
-                self.elements = $0.elements
-                onUpdate(self)
-            }).any
-        }.any
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (ArrayValue) -> Void) -> AnyView {
+        ExpandableStack(scope: scope, title: title) { [weak self] in
+                ProtoText(text: self?.protoString ?? "")
+            } content: {
+                ListEditView(scope: scope.next, title: title, value: .init(get: { [weak self] in
+                    self ?? .init(type: .int, elements: [IntValue(value: 666)])
+                }, set: {
+                    self.elements = $0.elements
+                }), onUpdate: {
+                    self.elements = $0.elements
+                    onUpdate(self)
+                })
+            }
+        .any
     }
 }
 
@@ -123,4 +129,40 @@ extension ArrayValue: CodeRepresentable {
     public var codeRepresentation: String {
         "[\(elements.map { $0.codeRepresentation }.joined(separator: ", "))]"
     }
+}
+
+struct FitSystemFont: ViewModifier {
+    var lineLimit: Int?
+    var minimumScaleFactor: CGFloat
+    var percentage: CGFloat
+
+    func body(content: Content) -> some View {
+        GeometryReader { geometry in
+            content
+                .font(.system(size: min(geometry.size.width, geometry.size.height) * percentage))
+                .fixedSize(horizontal: false, vertical: false)
+                .lineLimit(self.lineLimit)
+                .minimumScaleFactor(self.minimumScaleFactor)
+//                .position(x: geometry.frame(in: .local).midX, y: geometry.frame(in: .local).midY)
+        }
+    }
+}
+
+extension View {
+    func fitSystemFont(lineLimit: Int? = 1, minimumScaleFactor: CGFloat = 0.01, percentage: CGFloat = 1) -> ModifiedContent<Self, FitSystemFont> {
+        return modifier(FitSystemFont(lineLimit: lineLimit, minimumScaleFactor: minimumScaleFactor, percentage: percentage))
+    }
+}
+
+struct ProtoText: View {
+    let text: String
+    
+    var body: some View {
+        Text(text)
+            .font(.system(size: 12))
+    }
+}
+
+extension String {
+    var lines: [String] { components(separatedBy: .newlines)}
 }

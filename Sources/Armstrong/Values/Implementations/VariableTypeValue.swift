@@ -33,8 +33,8 @@ public final class VariableTypeValue: PrimitiveEditableVariableValue {
         fatalError()
     }
     
-    public func editView(title: String, onUpdate: @escaping (VariableTypeValue) -> Void) -> AnyView {
-        value.editView(title: title) { [weak self] in
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (VariableTypeValue) -> Void) -> AnyView {
+        value.editView(scope: scope, title: title) { [weak self] in
             guard let self = self else { return }
             self.value = $0
             onUpdate(self)
@@ -46,7 +46,7 @@ extension VariableType {
 
     public var valueString: String { protoString }
     
-    public func editView(title: String, onUpdate: @escaping (VariableType) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (VariableType) -> Void) -> AnyView {
         Picker("", selection: .init(get: {
             self
         }, set: { new in
@@ -55,6 +55,8 @@ extension VariableType {
             ForEach(AALibrary.shared.values) {
                 Text($0.type.title).tag($0.type)
             }
-        }.pickerStyle(.menu).any
+        }
+        .pickerScope(scope)
+        .any
     }
 }

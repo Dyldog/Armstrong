@@ -29,7 +29,7 @@ public final class StringValue: EditableVariableValue {
     public var valueString: String { value }
     public func value(with variables: Variables) throws -> VariableValue { self }
     
-    public func editView(title: String, onUpdate: @escaping (StringValue) -> Void) -> AnyView {
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (StringValue) -> Void) -> AnyView {
         HStack {
             Text(title).bold()
             Spacer()
@@ -40,7 +40,11 @@ public final class StringValue: EditableVariableValue {
                 self.value = $0
                 onUpdate(self)
             }))
-        }.any
+            .multilineTextAlignment(.trailing)
+        }
+        .tint(scope.color)
+        .foregroundStyle(scope.color)
+        .any
     }
     
     public static func == (lhs: StringValue, rhs: StringValue) -> Bool {

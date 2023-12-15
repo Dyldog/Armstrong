@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExpandableStack<Header: View, Body: View>: View {
     
+    let scope: Scope
     var title: String
     @ViewBuilder var headerCollapsed: () -> Header
     @ViewBuilder var content: () -> Body
@@ -18,37 +19,49 @@ struct ExpandableStack<Header: View, Body: View>: View {
     var body: some View {
         VStack {
             HStack {
-                Button(action: {
-                    withAnimation {
-                        expanded.toggle()
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Button(action: {
+                            withAnimation {
+                                expanded.toggle()
+                            }
+                        }, label: {
+                            Image(systemName: "arrowtriangle.down.fill")
+                                .rotationEffect(.degrees(expanded ? 0 : -90))
+                        })
+                        .simultaneousGesture(LongPressGesture().onEnded { _ in
+                            sheetPresented = true
+                        })
+                        .scope(scope)
+                        
+                        Text(title).bold().scope(scope)
                     }
-                }, label: {
-                    Image(systemName: "arrowtriangle.down.fill")
-                        .rotationEffect(.degrees(expanded ? 0 : -90))
-                })
-                .simultaneousGesture(LongPressGesture().onEnded { _ in
-                    sheetPresented = true
-                })
-                .foregroundStyle(.blue)
+                    
+                    Spacer()
+                }
                 
-                Text(title).bold()
                 Spacer()
                 
                 if !expanded {
-                    headerCollapsed()
+                    headerCollapsed().scope(scope)
                 }
             }
             
             if expanded {
                 HStack {
                     Rectangle()
-                        .foregroundStyle(.blue)
+                        .frame(maxHeight: .infinity)
+                        .foregroundStyle(scope.color)
                         .frame(width: 4)
                         .cornerRadius(2)
+                        .padding(.horizontal, 6)
                     
                     content()
                 }
-            } 
+                .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .sheet(isPresented: $sheetPresented, content: {
             NavigationView {

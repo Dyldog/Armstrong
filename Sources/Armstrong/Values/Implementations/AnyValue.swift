@@ -37,11 +37,17 @@ public final class AnyValue: EditableVariableValue {
         try await value.value(with: variables)
     }
     
-    public func editView(title: String, onUpdate: @escaping (AnyValue) -> Void) -> AnyView {
-        value.editView(title: title) {
-            self.value = $0
-            onUpdate(self)
+    public func editView(scope: Scope, title: String, onUpdate: @escaping (AnyValue) -> Void) -> AnyView {
+        ExpandableStack(scope: scope, title: title) { [weak self] in
+            ProtoText(text: self?.value.protoString ?? "")
+        } content: { [weak self] in
+            EditVariableView(scope: scope.next, name: title, value: self?.value ?? NilValue()) { [weak self] in
+                guard let self else { return }
+                self.value = $0
+                onUpdate(self)
+            }
         }
+        .any
     }
 }
 
