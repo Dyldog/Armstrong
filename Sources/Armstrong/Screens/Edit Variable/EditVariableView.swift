@@ -23,35 +23,33 @@ public struct EditVariableView: View {
     }
         
     public var body: some View {
-        NavigationView {
-            List {
-                HStack {
-                    Text("Type")
-                    Spacer()
-                    Picker("Type", selection: $selectedTypeIndex) {
-                        ForEach(enumerated: AALibrary.shared.values) { (index, element) in
-                            Text(element.type.title).tag(index)
-                        }
-                    }.pickerStyle(.menu)
-                }
-                
-                HStack {
-                    if !(value is any CompositeEditableVariableValue) {
-                        Text("Value")
-                        Spacer()
+        VStack {
+            HStack {
+                Text("Type")
+                Spacer()
+                Picker("Type", selection: $selectedTypeIndex) {
+                    ForEach(enumerated: AALibrary.shared.values) { (index, element) in
+                        Text(element.type.title).tag(index)
                     }
-                    value.editView(title: name, onUpdate: {
-                        self.value = $0
-                        onUpdate($0)
-                    })
-                }
+                }.pickerStyle(.menu)
             }
-            .buttonStyle(.plain)
-            .navigationTitle(name)
-            .onChange(of: selectedTypeIndex, perform: { value in
-                self.value = selectedType.makeDefault()
-                onUpdate(self.value)
-            })
+            
+            HStack {
+                if !(value is any CompositeEditableVariableValue) {
+                    Text("Value")
+                    Spacer()
+                }
+                value.editView(title: name, onUpdate: {
+                    self.value = $0
+                    onUpdate($0)
+                })
+            }
         }
+        .buttonStyle(.plain)
+        .navigationTitle(name)
+        .onChange(of: selectedTypeIndex, perform: { value in
+            self.value = selectedType.makeDefault()
+            onUpdate(self.value)
+        })
     }
 }

@@ -20,13 +20,17 @@ public final class {{ type.name }}Value: EditableVariableValue, Codable, Copying
     }
     
     public func editView(title: String, onUpdate: @escaping ({{ type.name }}Value) -> Void) -> AnyView {
-        TextField("", text: .init(get: { [weak self] in
-            self?.protoString ?? "ERROR"
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = {{ type.name }}($0) ?? self.value
-            onUpdate(self)
-        })).any
+        HStack {
+            Text(title.capitalized).bold()
+            Spacer()
+            TextField("", text: .init(get: { [weak self] in
+                self?.protoString ?? "ERROR"
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = {{ type.name }}($0) ?? self.value
+                onUpdate(self)
+            }))
+        }.any
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue {

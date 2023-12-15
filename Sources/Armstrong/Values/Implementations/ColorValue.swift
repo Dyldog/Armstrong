@@ -25,13 +25,17 @@ public final class ColorValue: EditableVariableValue {
     }
     
     public func editView(title: String, onUpdate: @escaping (ColorValue) -> Void) -> AnyView {
-        ColorPicker("Set the background color", selection: .init(get: { [weak self] in
-            self?.value ?? .blue
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = $0
-            onUpdate(self)
-        })).labelsHidden().any
+        HStack {
+            Text(title).bold()
+            Spacer()
+            ColorPicker("Set the background color", selection: .init(get: { [weak self] in
+                self?.value ?? .blue
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = $0
+                onUpdate(self)
+            })).labelsHidden()
+        }.any
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue {

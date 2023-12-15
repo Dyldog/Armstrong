@@ -123,47 +123,48 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable 
     public func value(with variables: Variables) async throws -> VariableValue {
         try await value.value.value(with: variables)
     }
-
+    
     public func editView(title: String, onUpdate: @escaping (TypedValue<T>) -> Void) -> AnyView {
-        HStack {
-            Picker("", selection: .init(get: { [weak self] in
-                self?.value.type ?? .constant
-            }, set: { [weak self] (new: TypedValueOptionType) in
-                guard let self = self else { return }
-                self.value = new.makeDefault()
-                onUpdate(self)
-            })) {
-                ForEach(TypedValueOptionType.allCases) {
-                    Text($0.title).tag($0)
-                }
-            }.pickerStyle(.menu).any
-            
-            value.value.editView(title: title) {
-                switch self.value.type {
-                case .constant:
-                    guard let constantValue = $0 as? T else { return }
-                    self.value = .constant(constantValue)
-                case .variable:
-                    guard let variableValue = $0 as? Variable else { return }
-                    self.value = .variable(variableValue)
-                case .result:
-                    guard let resultValue = $0 as? ResultValue else { return }
-                    self.value = .result(resultValue)
-                }
-                onUpdate(self)
+        return ExpandableStack(title: title) {
+            HStack {
+                Text(self.protoString)
             }
-        }.any
-//        HStack {
-//            Text(value.protoString)
-//            SheetButton(title: { Text("Edit") }) {
-//                EditVariableView(value: value) { [weak self] in
-//                    guard let self = self else { return }
-//                    self.value = $0
-//                }
-//            } onDismiss: {
-//                onUpdate(self)
-//            }
-//        }.any
+        } content: {
+            VStack {
+                HStack {
+                    Text("Type").bold()
+                    Spacer()
+                    Picker("Type", selection: .init(get: { [weak self] in
+                        self?.value.type ?? .constant
+                    }, set: { [weak self] (new: TypedValueOptionType) in
+                        guard let self = self else { return }
+                        self.value = new.makeDefault()
+                        onUpdate(self)
+                    })) {
+                        ForEach(TypedValueOptionType.allCases) {
+                            Text($0.title).tag($0)
+                        }
+                    }.pickerStyle(.menu).any
+                }
+                
+                self.value.value.editView(title: "Value") { [weak self] in
+                    guard let self else { return }
+                    switch self.value.type {
+                    case .constant:
+                        guard let constantValue = $0 as? T else { return }
+                        self.value = .constant(constantValue)
+                    case .variable:
+                        guard let variableValue = $0 as? Variable else { return }
+                        self.value = .variable(variableValue)
+                    case .result:
+                        guard let resultValue = $0 as? ResultValue else { return }
+                        self.value = .result(resultValue)
+                    }
+                    onUpdate(self)
+                }.multilineTextAlignment(.trailing)
+            }
+        }
+        .any
     }
 }
 

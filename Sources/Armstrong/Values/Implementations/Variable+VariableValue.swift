@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import DylKit
 
 /// A value that provides a value from the variables
 public final class Variable: EditableVariableValue {
@@ -38,17 +37,13 @@ public final class Variable: EditableVariableValue {
     }
     
     public func editView(title: String, onUpdate: @escaping (Variable) -> Void) -> AnyView {
-        HStack {
-            Text(protoString)
-            SheetButton(title: { Image(systemName: "ellipsis.circle.fill") }) {
-                EditVariableView(name: title, value: value) { [weak self] in
-                    guard let self = self else { return }
-                    self.value = $0
-                }
-            } onDismiss: {
-                onUpdate(self)
-            }
-        }.any
+        self.value.editView(title: title) { [weak self] value in
+            guard let self else { return }
+            self.value = value
+            onUpdate(self)
+        }
+        .multilineTextAlignment(.trailing)
+        .any
     }
 }
 

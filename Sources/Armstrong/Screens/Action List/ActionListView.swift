@@ -14,40 +14,33 @@ struct ActionListView: View {
     let onUpdate: ([any StepType]) -> Void
     
     var body: some View {
-        NavigationView {
-            ScrollView {
+        VStack {
+            addButton(index: 0)
+            
+            ForEach(enumerated: steps) { (index, element) in
                 VStack {
-                addButton(index: 0)
-                
-                    ForEach(enumerated: steps) { (index, element) in
-                        VStack {
-                            HStack {
-                                Text(type(of: element).title).bold().foregroundStyle(.gray).brightness(-0.2)
-                                
-                                ElementDeleteButton {
-                                    steps = steps.removing(at: index)
-                                    onUpdate(steps)
-                                }
-                            }
-                            
-                            element.editView(title: title) { value in
-                                onUpdate(steps.replacing(value, at: index))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.white))
-                        .padding()
-                        .frame(maxWidth: .infinity)
+                    HStack {
+                        Text(type(of: element).title).bold().foregroundStyle(.gray).brightness(-0.2)
                         
-                        addButton(index: index + 1)
+                        ElementDeleteButton {
+                            steps = steps.removing(at: index)
+                            onUpdate(steps)
+                        }
                     }
+                    
+                    element.editView(title: title) { value in
+                        onUpdate(steps.replacing(value, at: index))
+                    }
+                    .buttonStyle(.plain)
                 }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.white))
                 .frame(maxWidth: .infinity)
+                
+                addButton(index: index + 1)
             }
-            .background(.gray.opacity(0.1))
-            .navigationTitle(title)
-        }.sheet(item: $showAddIndex) { index in
+        }
+        .frame(maxWidth: .infinity).sheet(item: $showAddIndex) { index in
             AddActionView { newStep in
                 steps = steps.inserting(newStep, at: index)
                 onUpdate(steps)
@@ -62,5 +55,6 @@ struct ActionListView: View {
         } label: {
             Image(systemName: "plus.app.fill")
         }
+        .padding(4)
     }
 }

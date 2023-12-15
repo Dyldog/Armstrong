@@ -30,13 +30,17 @@ public final class StringValue: EditableVariableValue {
     public func value(with variables: Variables) throws -> VariableValue { self }
     
     public func editView(title: String, onUpdate: @escaping (StringValue) -> Void) -> AnyView {
-        TextField("", text: .init(get: { [weak self] in
-            self?.value ?? "ERROR666"
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = $0
-            onUpdate(self)
-        })).any
+        HStack {
+            Text(title).bold()
+            Spacer()
+            TextField("", text: .init(get: { [weak self] in
+                self?.value ?? "ERROR666"
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = $0
+                onUpdate(self)
+            }))
+        }.any
     }
     
     public static func == (lhs: StringValue, rhs: StringValue) -> Bool {

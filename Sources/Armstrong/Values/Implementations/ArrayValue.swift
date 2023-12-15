@@ -56,21 +56,16 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
     }
     
     public func editView(title: String, onUpdate: @escaping (ArrayValue) -> Void) -> AnyView {
-        HStack {
+        VStack {
             Text(protoString)
-            SheetButton(title: { Image(systemName: "ellipsis.circle.fill") }) {
-                ListEditView(title: title, value: .init(get: { [weak self] in
-                    self ?? .init(type: .int, elements: [IntValue(value: 666)])
-                }, set: {
-                    self.elements = $0.elements
-//                    onUpdate(self)
-                }), onUpdate: {
-                    self.elements = $0.elements
-                    onUpdate(self)
-                })
-            } onDismiss: {
+            ListEditView(title: title, value: .init(get: { [weak self] in
+                self ?? .init(type: .int, elements: [IntValue(value: 666)])
+            }, set: {
+                self.elements = $0.elements
+            }), onUpdate: {
+                self.elements = $0.elements
                 onUpdate(self)
-            }.any
+            }).any
         }.any
     }
 }

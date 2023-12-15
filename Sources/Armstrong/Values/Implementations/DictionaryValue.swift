@@ -68,19 +68,16 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     }
     
     public func editView(title: String, onUpdate: @escaping (DictionaryValue) -> Void) -> AnyView {
-        HStack {
+        VStack {
             Text(protoString)
-            SheetButton(title: { Image(systemName: "ellipsis.circle.fill") }) {
-                DictionaryEditView(title: title, value: .init(get: {
-                    self
-                }, set: {
-                    self.elements = $0.elements
-                }), onUpdate: {
-                    self.elements = $0.elements
-                })
-            } onDismiss: {
+            DictionaryEditView(title: title, value: .init(get: {
+                self
+            }, set: {
+                self.elements = $0.elements
+            }), onUpdate: {
+                self.elements = $0.elements
                 onUpdate(self)
-            }.any
+            })
         }.any
     }
 }

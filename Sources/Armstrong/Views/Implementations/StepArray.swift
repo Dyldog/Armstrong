@@ -40,20 +40,16 @@ public final class StepArray: Codable, EditableVariableValue {
     }
     
     public func editView(title: String, onUpdate: @escaping (StepArray) -> Void) -> AnyView {
-        return HStack {
-            Text(protoString)
-            SheetButton(title: {
-                Image(systemName: "ellipsis.circle.fill")
-            }) { [weak self] in
-                guard let self = self else { return Text("WASNIL").any }
-                return ActionListView(title: "Edit Steps", steps: self.value, onUpdate: { [weak self] in
-                    guard let self = self else { return }
-                    self.value = $0
-                    onUpdate(self)
-                }).any
-            } onDismiss: {
-                
+        return ExpandableStack(title: title) {
+            HStack {
+                Text(self.protoString)
             }
+        } content: {
+            ActionListView(title: "Edit Steps", steps: self.value, onUpdate: { [weak self] in
+                guard let self = self else { return }
+                self.value = $0
+                onUpdate(self)
+            })
         }.any
     }
     

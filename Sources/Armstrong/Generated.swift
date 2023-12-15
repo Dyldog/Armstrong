@@ -233,13 +233,17 @@ public final class FloatValue: EditableVariableValue, Codable, Copying, NumericV
         .init(value: Self.defaultValue)
     }
     public func editView(title: String, onUpdate: @escaping (FloatValue) -> Void) -> AnyView {
-        TextField("", text: .init(get: { [weak self] in
-            self?.protoString ?? "ERROR"
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = Float($0) ?? self.value
-            onUpdate(self)
-        })).any
+        HStack {
+            Text(title.capitalized).bold()
+            Spacer()
+            TextField("", text: .init(get: { [weak self] in
+                self?.protoString ?? "ERROR"
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = Float($0) ?? self.value
+                onUpdate(self)
+            }))
+        }.any
     }
     public func add(_ other: VariableValue) throws -> VariableValue {
         guard let other = other as? FloatValue else { throw VariableValueError.wrongTypeForOperation }
@@ -286,13 +290,17 @@ public final class IntValue: EditableVariableValue, Codable, Copying, NumericVal
         .init(value: Self.defaultValue)
     }
     public func editView(title: String, onUpdate: @escaping (IntValue) -> Void) -> AnyView {
-        TextField("", text: .init(get: { [weak self] in
-            self?.protoString ?? "ERROR"
-        }, set: { [weak self] in
-            guard let self = self else { return }
-            self.value = Int($0) ?? self.value
-            onUpdate(self)
-        })).any
+        HStack {
+            Text(title).bold()
+            Spacer()
+            TextField("", text: .init(get: { [weak self] in
+                self?.protoString ?? "ERROR"
+            }, set: { [weak self] in
+                guard let self = self else { return }
+                self.value = Int($0) ?? self.value
+                onUpdate(self)
+            }))
+        }.any
     }
     public func add(_ other: VariableValue) throws -> VariableValue {
         guard let other = other as? IntValue else { throw VariableValueError.wrongTypeForOperation }

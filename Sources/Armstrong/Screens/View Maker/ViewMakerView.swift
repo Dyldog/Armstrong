@@ -51,9 +51,16 @@ public struct ViewMakerView: View {
                 HStack {
                     if viewModel.makeMode {
                         SheetButton(title: { Text("Init Actions") }) {
-                            ActionListView(title: "Init Actions", steps: viewModel.initActions.value, onUpdate: {
-                                viewModel.updateInitActions(.init(value: $0))
-                            })
+                            NavigationView {
+                                ScrollView {
+                                    ActionListView(title: "Init Actions", steps: viewModel.initActions.value, onUpdate: {
+                                        viewModel.updateInitActions(.init(value: $0))
+                                    })
+                                    .padding()
+                                }
+                                .background(.gray.opacity(0.1))
+                                .navigationTitle("Init Actions")
+                            }
                         } onDismiss: {
                             //
                         }
