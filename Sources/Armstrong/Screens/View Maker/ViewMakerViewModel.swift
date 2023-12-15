@@ -30,7 +30,21 @@ public class ViewMakerViewModel: ObservableObject {
     @Published var showErrors: Bool = false
 //    var error: VariableValueError?
     
-    @Published var makeMode: Bool = false
+    var makeMode: Bool = false {
+        didSet {
+            Task {
+                do {
+                    try await self.makeNewVariables()
+                } catch {
+                    if let error = error as? VariableValueError {
+                        self.error = error
+                    } else {
+                        print("Unhandled error: \(error)")
+                    }
+                }
+            }
+        }
+    }
     
 //    @Published private(set) var updater: Int = 0
     
@@ -78,20 +92,6 @@ public class ViewMakerViewModel: ObservableObject {
         
         _variables.objectWillChange.sink { [weak self] _ in
             self?.objectWillChange.send()
-        }.store(in: &cancellables)
-        
-        $makeMode.dropFirst().sink { [weak self] _ in
-            Task {
-                do {
-                    try await self?.makeNewVariables()
-                } catch {
-                    if let error = error as? VariableValueError {
-                        self?.error = error
-                    } else {
-                        print("Unhandled error: \(error)")
-                    }
-                }
-            }
         }.store(in: &cancellables)
         
 //        $content.dropFirst().sink { content in

@@ -27,6 +27,14 @@ public enum TypedValueOptionType: Int, CaseIterable, Hashable {
         case .result: return "RESULT"
         }
     }
+    
+    public var valueTitle: String {
+        switch self {
+        case .variable: return "Name"
+        case .constant: return "Value"
+        case .result: return "Steps"
+        }
+    }
 }
 
 public enum TypedValueOption<T: TypeableValue>: Codable {
@@ -149,7 +157,7 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable 
                     .any
                 }
                 
-                self.value.value.editView(scope: scope.next, title: "Value") { [weak self] in
+                self.value.value.editView(scope: scope.next, title: self.value.type.valueTitle) { [weak self] in
                     guard let self else { return }
                     switch self.value.type {
                     case .constant:

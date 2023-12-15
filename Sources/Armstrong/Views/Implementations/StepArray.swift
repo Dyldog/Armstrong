@@ -37,12 +37,14 @@ public final class StepArray: Codable, EditableVariableValue {
     
     public func value(with variables: Variables) async throws -> VariableValue {
         self
+//        try await run(with: variables)
+//        return await variables.value(for: "$0") ?? NilValue()
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (StepArray) -> Void) -> AnyView {
         return ExpandableStack(scope: scope, title: title) {
             HStack {
-                Text(self.protoString)
+                ProtoText(self.protoString)
             }
         } content: {
             ActionListView(scope: scope.next, title: "Edit Steps", steps: self.value, onUpdate: { [weak self] in

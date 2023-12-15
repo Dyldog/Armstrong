@@ -15,43 +15,56 @@ struct DictionaryEditView: View {
     let onUpdate: (DictionaryValue) -> Void
     
     var body: some View {
-        NavigationView {
-            List {
+        VStack {
+            HStack {
+                Text("Type")
+                    .bold()
+                    .scope(scope)
+                
+                Spacer()
                 value.type.editView(
                     scope: scope, title: title, onUpdate: {
                         self.value.type = $0
                         onUpdate(value)
                     }
                 )
-                
-                ForEach(value.elements.map { ($0.key, $0.value) }, id: \.0) { (key, value) in
+            }
+            
+            ForEach(value.elements.map { ($0.key, $0.value) }, id: \.0) { (key, value) in
+                HStack {
                     VStack {
-                        HStack {
-                            key.editView(scope: scope, title: "key", onUpdate: { editedElement in
-                                onMain {
-                                    _ = try? self.value.update(oldKey: key, to: editedElement)
-                                    onUpdate(self.value)
-                                }
-                            })
-                            
-                            value.editView(scope: scope, title: key.value, onUpdate: { editedElement in
-                                self.value.elements[key] = editedElement
+                        key.editView(scope: scope, title: "Key", onUpdate: { editedElement in
+                            onMain {
+                                _ = try? self.value.update(oldKey: key, to: editedElement)
                                 onUpdate(self.value)
-                            })
-                        }
+                            }
+                        })
+                        
+                        value.editView(scope: scope, title: "Value", onUpdate: { editedElement in
+                            self.value.elements[key] = editedElement
+                            onUpdate(self.value)
+                        })
+                    }
+                    
+                    ElementDeleteButton(color: scope.color) {
+                        self.value.elements.removeValue(forKey: key)
+                        onUpdate(self.value)
                     }
                 }
-                
-                addButton()
             }
-            .navigationTitle(title)
+            
+            addButton()
         }
+        .frame(maxWidth: .infinity)
     }
     
     func addButton() -> some View {
-        SwiftUI.Button("+") {
-            value.elements[StringValue(value: "_NEW_")] = type(of: value).makeDefault()
+        SwiftUI.Button {
+            guard let type = value.type.value.editableType else { return }
+            value.elements[StringValue(value: "_NEW_")] = type.makeDefault()
             onUpdate(value)
+        } label: {
+            Image(systemName: "plus.app.fill").scope(scope)
         }
     }
 }

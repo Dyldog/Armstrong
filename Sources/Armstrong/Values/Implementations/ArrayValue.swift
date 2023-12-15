@@ -157,6 +157,14 @@ extension View {
 struct ProtoText: View {
     let text: String
     
+    init(_ text: String) {
+        self.text = text
+    }
+    
+    init(text: String) {
+        self.text = text
+    }
+    
     var body: some View {
         Text(text)
             .font(.system(size: 12))

@@ -68,17 +68,19 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (DictionaryValue) -> Void) -> AnyView {
-        VStack {
-            Text(protoString)
-            DictionaryEditView(scope: scope, title: title, value: .init(get: {
-                self
-            }, set: {
-                self.elements = $0.elements
-            }), onUpdate: {
-                self.elements = $0.elements
-                onUpdate(self)
-            })
-        }.any
+        ExpandableStack(scope: scope, title: title) { [weak self] in
+                ProtoText(text: self?.protoString ?? "")
+            } content: {
+                DictionaryEditView(scope: scope, title: title, value: .init(get: {
+                    self
+                }, set: {
+                    self.elements = $0.elements
+                }), onUpdate: {
+                    self.elements = $0.elements
+                    onUpdate(self)
+                })
+            }
+        .any
     }
 }
 
