@@ -8,7 +8,7 @@
 import SwiftUI
 import DylKit
 
-// sourcery: variableTypeName = "list"
+// sourcery: variableTypeName = "list", skipCodable
 public final class ArrayValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .list }

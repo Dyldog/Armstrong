@@ -8,7 +8,7 @@
 import SwiftUI
 import DylKit
 
-// sourcery: variableTypeName = "view"
+// sourcery: variableTypeName = "view", skipCodable
 public final class AnyMakeableView: EditableVariableValue {
     
     public static var type: VariableType { .view }

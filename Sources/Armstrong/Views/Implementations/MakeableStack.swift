@@ -75,7 +75,7 @@ public struct MakeableStackView: View {
                         ]
                     }
                 }
-            } catch is VariableValueError {
+            } catch let error as VariableValueError {
                 self.error = error
             } catch {
                 print(error)

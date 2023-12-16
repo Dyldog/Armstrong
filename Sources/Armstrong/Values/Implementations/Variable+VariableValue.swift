@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// sourcery: skipCodable
 /// A value that provides a value from the variables
 public final class Variable: EditableVariableValue {
     public static var type: VariableType { .variable }

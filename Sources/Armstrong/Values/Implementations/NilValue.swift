@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// sourcery: variableTypeName = "`nil`"
+// sourcery: variableTypeName = "`nil`", skipCodable
 public final class NilValue: EditableVariableValue {
     
     public static var type: VariableType { .nil }

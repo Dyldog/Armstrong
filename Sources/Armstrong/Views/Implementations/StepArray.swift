@@ -8,6 +8,7 @@
 import SwiftUI
 import DylKit
 
+// sourcery: skipCodable
 public final class StepArray: Codable, EditableVariableValue {
     
     public static var type: VariableType { .stepArray }
@@ -117,5 +118,21 @@ extension StepArray: CodeRepresentable {
         }
         
         return outputs.joined(separator: "\n")
+    }
+}
+
+extension View {
+    func onFirstAppear(_ key: String, message: String) -> some View {
+        let key = "\(key)_SHOWN"
+        return self
+            .popover(isPresented: .init(get: {
+                !UserDefaults.standard.bool(forKey: key)
+            }, set: {
+                if $0 == true {
+                    UserDefaults.standard.set(true, forKey: key)
+                }
+            }), content: {
+                Text(message).font(.footnote)
+            })
     }
 }

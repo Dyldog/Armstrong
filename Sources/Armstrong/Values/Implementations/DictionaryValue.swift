@@ -8,6 +8,7 @@
 import SwiftUI
 import DylKit
 
+// sourcery: skipCodable
 public final class DictionaryValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .dictionary }

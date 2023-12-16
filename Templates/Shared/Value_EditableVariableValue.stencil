@@ -1,4 +1,5 @@
 {% import "partials/AutoCopy.stencil" %}
+{% import "partials/AutoCodable.stencil" %}
 {% import "partials/EditableProperties.stencil" %}
 {% import "partials/VariableTypeExtension.stencil" %}
 
@@ -14,5 +15,7 @@
 {% if type|!annotated:"skipVariableType" %}
 {%+ call VariableTypeExtension type +%}
 {% endif %}
+
+{% call AutoCodable type %}
 
 {% endfor %}

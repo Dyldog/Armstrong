@@ -8,7 +8,7 @@
 import SwiftUI
 import DylKit
 
-// sourcery: variableTypeName = "anyValue"
+// sourcery: variableTypeName = "anyValue", skipCodable
 public final class AnyValue: EditableVariableValue {
     
     public static var type: VariableType { .anyValue }

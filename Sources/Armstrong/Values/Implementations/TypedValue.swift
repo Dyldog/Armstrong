@@ -92,7 +92,7 @@ public enum TypedValueOption<T: TypeableValue>: Codable {
 public typealias TypeableValue = EditableVariableValue & Codable
 
 
-// sourcery: variableTypeName = "typedValue", skipVariableType, skipCodable
+// sourcery: variableTypeName = "typedValue", skipVariableType
 public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable {
     
     public static var type: VariableType { fatalError() }
