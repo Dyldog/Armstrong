@@ -11,10 +11,10 @@ import DylKit
 public struct MakeableStackView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    @ObservedObject var stack: MakeableStack
+    let stack: MakeableStack
     
     let onContentUpdate: (MakeableStack) -> Void
-    let onRuntimeUpdate: () -> Void
+    let onRuntimeUpdate: (@escaping Block) -> Void
     
     @State var showAddIndex: Int?
     @State var showEditIndex: Int?
@@ -23,7 +23,7 @@ public struct MakeableStackView: View {
     
     @State var elements: [any MakeableView]?
     
-    public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping () -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.stack = stack
@@ -48,7 +48,11 @@ public struct MakeableStackView: View {
                         MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element, onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
                         }, onRuntimeUpdate: onRuntimeUpdate, error: $error)
-                        .onEdit(showEditControls ? { self.showEditIndex = index } : nil)
+                        .editable(showEditControls, onEdit: {
+                            self.showEditIndex = index
+                        }, onLongPress: {
+                            UIPasteboard.general.copy(element)
+                        })
                         
                         if showEditControls {
                             ElementDeleteButton { onRemove(at: index) }
@@ -68,7 +72,8 @@ public struct MakeableStackView: View {
                     self.elements = array.elements.compactMap { $0 as! (any MakeableView) }
                 default:
                     if isRunning {
-                        self.elements = (try await stack.content.value(with: variables) as ArrayValue).elements.compactMap { $0 as? any MakeableView }
+                        let elements = (try await stack.content.value(with: variables) as ArrayValue).elements.compactMap { $0 as? any MakeableView }
+                        self.elements = elements
                     } else {
                         self.elements = [
                             MakeableLabel.withText(stack.content.protoString, multiline: true)
@@ -83,7 +88,7 @@ public struct MakeableStackView: View {
         }
         .base(stack.base)
         .if(showEditControls) {
-            $0.padding().overlay(
+            $0.padding(4).overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.gray.opacity(0.5), lineWidth: 2)
             )
@@ -91,7 +96,8 @@ public struct MakeableStackView: View {
         .sheet(item: $showAddIndex, content: { index in
             AddViewView(viewModel: .init(onSelect: { view in
                 guard let elements = stack.content.value.constant else { return }
-                elements.elements.append(view)
+                elements.elements.insert(view, at: index)
+                self.elements?.insert(view as any MakeableView, at: index)
                 stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
@@ -107,22 +113,33 @@ public struct MakeableStackView: View {
     private func onRemove(at index: Int) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements.remove(at: index)
+        self.elements?.remove(at: index)
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
     private func onUpdate(at index: Int, with value: any MakeableView) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements[index] = value
+        self.elements?[index] = value
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
     
     func makeButton(at index: Int) -> some View {
-        SwiftUI.Button {
+        LongPressButton {
             showAddIndex = index
+        } longPressAction: {
+            guard let view = UIPasteboard.general.pasteValue() as? (any MakeableView) else { return }
+            guard let elements = stack.content.value.constant else { return }
+            elements.elements.insert(view, at: index)
+            self.elements?.insert(view as any MakeableView, at: index)
+            stack.content = .value(elements)
+            onContentUpdate(stack)
         } label: {
             Image(systemName: "plus.app.fill")
         }
+        .padding(4)
+        .foregroundStyle(.blue)
     }
 }
 

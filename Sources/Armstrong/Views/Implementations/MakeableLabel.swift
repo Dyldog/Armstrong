@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Armstrong
+import DylKit
 
 public struct MakeableLabelView: View {
     let isRunning: Bool
@@ -14,7 +14,7 @@ public struct MakeableLabelView: View {
     let label: MakeableLabel
     
     let onContentUpdate: (MakeableLabel) -> Void
-    let onRuntimeUpdate: () -> Void
+    let onRuntimeUpdate: (@escaping Block) -> Void
     
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
@@ -28,7 +28,7 @@ public struct MakeableLabelView: View {
     @State var isMultiline: Bool = false
     
     
-    public init(isRunning: Bool, showEditControls: Bool, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping () -> Void, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.label = label
@@ -41,13 +41,28 @@ public struct MakeableLabelView: View {
     func labelText() async -> String {
         do {
             if isRunning {
-                return try await label.text.value(with: variables).valueString
+                let value = try await label.text.value(with: variables).valueString
+                return value
             } else {
                 return label.protoString
             }
         } catch let error as VariableValueError {
             self.error = error
             return "Error"
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+    
+    private func updateValues() async  {
+        do {
+            self.text = await labelText()
+            self.fontSize = (try await label.fontSize.value(with: variables) as IntValue).value
+            self.fontWeight = (try await label.fontWeight.value(with: variables) as FontWeightValue).value
+            self.italic = (try await label.italic.value(with: variables) as BoolValue).value
+            self.base = (try await label.base.value(with: variables) as MakeableBase)
+            self.textColor = (try await label.textColor.value(with: variables) as ColorValue).value
+            self.isMultiline = (try await label.isMultiline.value(with: variables) as BoolValue).value
         } catch {
             fatalError(error.localizedDescription)
         }
@@ -61,17 +76,7 @@ public struct MakeableLabelView: View {
             .foregroundStyle(textColor)
             .base(base)
             .task(id: variables.hashValue) {
-                do {
-                    self.text = await labelText()
-                    self.fontSize = (try await label.fontSize.value(with: variables) as IntValue).value
-                    self.fontWeight = (try await label.fontWeight.value(with: variables) as FontWeightValue).value
-                    self.italic = (try await label.italic.value(with: variables) as BoolValue).value
-                    self.base = (try await label.base.value(with: variables) as MakeableBase)
-                    self.textColor = (try await label.textColor.value(with: variables) as ColorValue).value
-                    self.isMultiline = (try await label.isMultiline.value(with: variables) as BoolValue).value
-                } catch {
-                    fatalError(error.localizedDescription)
-                }
+                await updateValues()
             }
             .any
     }

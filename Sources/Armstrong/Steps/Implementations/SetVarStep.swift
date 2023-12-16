@@ -26,6 +26,7 @@ public final class SetVarStep: Step {
     public func run(with variables: Variables) async throws {
         let varValue = try await varName.value.value(with: variables)
         let valueValue = try await value.value(with: variables)
+
         await variables.set(valueValue, for: varValue.valueString)
     }
 

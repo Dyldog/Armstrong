@@ -48,11 +48,16 @@ public final class StepArray: Codable, EditableVariableValue {
                 ProtoText(self.protoString)
             }
         } content: {
-            ActionListView(scope: scope.next, title: "Edit Steps", steps: self.value, onUpdate: { [weak self] in
+            ActionListView(
+                scope: scope.next,
+                title: "Edit Steps",
+                padSteps: false,
+                steps: self.value
+            ) { [weak self] in
                 guard let self = self else { return }
                 self.value = $0
                 onUpdate(self)
-            })
+            }
         }.any
     }
     

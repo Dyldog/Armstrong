@@ -3,7 +3,7 @@
 {% for type in types.implementing.MakeableView|!protocol %}
 {% if type.kind != "protocolComposition" %}
 extension {{ type.name }} {
-    public func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping () -> Void, error: Binding<VariableValueError?>) -> AnyView {
+    public func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
         {{ type.name }}View(isRunning: isRunning, showEditControls: showEditControls, {%+ call VariableTypeName type +%}: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }

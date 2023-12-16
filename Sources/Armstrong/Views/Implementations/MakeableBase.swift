@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DylKit
 
 public final class MakeableBase: MakeableView, Codable {
     
@@ -46,12 +47,12 @@ public struct MakeableBaseView: View {
     let base: MakeableBase
     
     let onContentUpdate: (MakeableBase) -> Void
-    let onRuntimeUpdate: () -> Void
+    let onRuntimeUpdate: (@escaping Block) -> Void
     
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
         
-    public init(isRunning: Bool, showEditControls: Bool, base: MakeableBase, onContentUpdate: @escaping (MakeableBase) -> Void, onRuntimeUpdate: @escaping () -> Void, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, base: MakeableBase, onContentUpdate: @escaping (MakeableBase) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.base = base

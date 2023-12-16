@@ -29,7 +29,7 @@ public struct ViewMakerView: View {
                                 onContentUpdate: { content in
                                     viewModel.content = content
                                 }, onRuntimeUpdate: {
-                                    viewModel.onRuntimeUpdate()
+                                    viewModel.onRuntimeUpdate(completion: $0)
                                 },
                                 error: $viewModel.error
                             ).any
@@ -53,9 +53,13 @@ public struct ViewMakerView: View {
                         SheetButton(title: { Text("Init Actions") }) {
                             NavigationView {
                                 ScrollView {
-                                    ActionListView(scope: .init(), title: "Init Actions", steps: viewModel.initActions.value, onUpdate: {
+                                    ActionListView(
+                                        scope: .init(),
+                                        title: "Init Actions",
+                                        steps: viewModel.initActions.value
+                                    ) {
                                         viewModel.updateInitActions(.init(value: $0))
-                                    })
+                                    }
                                     .padding()
                                 }
                                 .background(.gray.opacity(0.1))

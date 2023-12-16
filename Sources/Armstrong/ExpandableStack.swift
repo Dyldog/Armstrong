@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DylKit
 
 struct ExpandableStack<Header: View, Body: View>: View {
     
@@ -23,17 +24,16 @@ struct ExpandableStack<Header: View, Body: View>: View {
                     Spacer()
                     
                     HStack {
-                        Button(action: {
+                        LongPressButton {
                             withAnimation {
                                 expanded.toggle()
                             }
-                        }, label: {
+                        } longPressAction: {
+                            sheetPresented = true
+                        } label: {
                             Image(systemName: "arrowtriangle.down.fill")
                                 .rotationEffect(.degrees(expanded ? 0 : -90))
-                        })
-                        .simultaneousGesture(LongPressGesture().onEnded { _ in
-                            sheetPresented = true
-                        })
+                        }
                         .scope(scope)
                         
                         Text(title).bold().scope(scope)

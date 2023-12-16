@@ -23,7 +23,7 @@ struct EditViewView: View {
                             showEditControls: false,
                             view: viewModel.editable,
                             onContentUpdate: { _ in },
-                            onRuntimeUpdate: { },
+                            onRuntimeUpdate: { _ in },
                             error: $error
                         )
                         .id(update)

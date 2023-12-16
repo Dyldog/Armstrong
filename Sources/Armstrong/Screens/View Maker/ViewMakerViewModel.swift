@@ -142,9 +142,10 @@ public class ViewMakerViewModel: ObservableObject {
         return newVars
     }
     
-    func onRuntimeUpdate() {
+    func onRuntimeUpdate(completion: @escaping Block) {
         Task { @MainActor in
             try await self.updateVariablesFromContent(vars: variables)
+            completion()
         }
     }
     

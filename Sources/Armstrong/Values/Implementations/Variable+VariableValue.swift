@@ -11,14 +11,14 @@ import SwiftUI
 /// A value that provides a value from the variables
 public final class Variable: EditableVariableValue {
     public static var type: VariableType { .variable }
-    public var value: any EditableVariableValue
+    public var value: AnyValue
     
-    public init(value: any EditableVariableValue) {
+    public init(value: AnyValue) {
         self.value = value
     }
     
     public static func makeDefault() -> Variable {
-        .init(value: StringValue(value: "VAR"))
+        .init(value: StringValue(value: "VAR").any)
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue {
@@ -54,12 +54,12 @@ extension Variable: Codable {
     
     public convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(value: try container.decode(CodableVariableValue.self, forKey: .name).value)
+        self.init(value: try container.decode(AnyValue.self, forKey: .name))
     }
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(CodableVariableValue(value: value), forKey: .name)
+        try container.encode(value, forKey: .name)
     }
 }
 
@@ -71,7 +71,7 @@ extension Variable: CodeRepresentable {
 
 extension Variable {
     public static func named(_ name: String) -> Variable {
-        .init(value: StringValue(value: name))
+        .init(value: StringValue(value: name).any)
     }
 }
 

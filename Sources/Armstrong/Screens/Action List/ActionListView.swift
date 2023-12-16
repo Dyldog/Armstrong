@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DylKit
 
 struct ActionListView: View {
     let scope: Scope
@@ -13,6 +14,21 @@ struct ActionListView: View {
     @State var showAddIndex: Int?
     @State var steps: [any StepType]
     let onUpdate: ([any StepType]) -> Void
+    let padSteps: Bool
+    
+    init(
+        scope: Scope,
+        title: String,
+        padSteps: Bool = true,
+        steps: [any StepType],
+        onUpdate: @escaping ([any StepType]) -> Void
+    ) {
+        self.scope = scope
+        self.title = title
+        self.padSteps = padSteps
+        self.steps = steps
+        self.onUpdate = onUpdate
+    }
     
     var body: some View {
         VStack {
@@ -24,6 +40,9 @@ struct ActionListView: View {
                         Text(type(of: element).title)
                             .bold()
                             .scope(scope.next)
+                            .onLongPressGesture {
+                                UIPasteboard.general.copy(element)
+                            }
                         
                         ElementDeleteButton(color: scope.next.color) {
                             steps = steps.removing(at: index)
@@ -36,7 +55,7 @@ struct ActionListView: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .padding()
+                .if(padSteps) { $0.padding() }
                 .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.white))
                 .frame(maxWidth: .infinity)
                 
@@ -53,12 +72,36 @@ struct ActionListView: View {
     }
     
     func addButton(index: Int) -> some View {
-        SwiftUI.Button {
+        LongPressButton {
             showAddIndex = index
+        } longPressAction: {
+            guard let step = UIPasteboard.general.pasteValue() as? (any StepType) else { return }
+            steps = steps.inserting(step, at: index)
+            onUpdate(steps)
         } label: {
             Image(systemName: "plus.app.fill")
         }
         .padding(4)
         .scope(scope)
+    }
+}
+
+import AudioToolbox
+
+extension UIPasteboard {
+    func copy(_ value: any EditableVariableValue) {
+        self.string = try! JSONEncoder().encode(CodableVariableValue(value: value)).string
+        AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
+
+    }
+    
+    func pasteValue() -> (any EditableVariableValue)? {
+        guard let data = self.string?.data(using: .utf8), let value = try? JSONDecoder().decode(CodableVariableValue.self, from: data) else {
+            return nil
+        }
+        
+        AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
+        
+        return value.value
     }
 }
