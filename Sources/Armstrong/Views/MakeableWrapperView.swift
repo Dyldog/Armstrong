@@ -26,9 +26,7 @@ public struct MakeableWrapperView: View {
     }
     
     public var body: some View {
-        ZStack {
-            inner
-        }
+        inner
     }
     
     var inner: some View {

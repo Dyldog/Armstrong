@@ -41,10 +41,18 @@ public final class AnyValue: EditableVariableValue {
         ExpandableStack(scope: scope, title: title) { [weak self] in
             ProtoText(text: self?.value.protoString ?? "")
         } content: { [weak self] in
-            EditVariableView(scope: scope.next, name: title, value: self?.value ?? NilValue()) { [weak self] in
-                guard let self else { return }
-                self.value = $0
-                onUpdate(self)
+            if let value = self?.value as? any MakeableView {
+                EditViewView(title: title, scope: scope.next, viewModel: .init(editable: value, onUpdate: { [weak self] in
+                    guard let self else { return }
+                    self.value = $0
+                    onUpdate(self)
+                }), padSteps: false)
+            } else {
+                EditVariableView(scope: scope.next, name: title, value: self?.value ?? NilValue()) { [weak self] in
+                    guard let self else { return }
+                    self.value = $0
+                    onUpdate(self)
+                }
             }
         }
         .any

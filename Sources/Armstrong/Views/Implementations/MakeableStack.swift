@@ -11,7 +11,7 @@ import DylKit
 public struct MakeableStackView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    let stack: MakeableStack
+    @ObservedObject var stack: MakeableStack
     
     let onContentUpdate: (MakeableStack) -> Void
     let onRuntimeUpdate: (@escaping Block) -> Void
@@ -21,7 +21,12 @@ public struct MakeableStackView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @State var elements: [any MakeableView]?
+    @State var elements: ArrayValue = .init(type: .string, elements: [])
+    var views: [HashableBox<any MakeableView>] {
+        elements.elements
+            .compactMap { $0 as? any MakeableView }
+            .map { .init($0, hash: { $0.protoString }) }
+    }
     
     public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
@@ -40,18 +45,18 @@ public struct MakeableStackView: View {
                 makeButton(at: 0)
             }
             
-            if elements?.isEmpty == true, !showEditControls {
+            if views.isEmpty == true, !showEditControls {
                 Text("STACKs")
             } else {
-                ForEach(enumerated: elements ?? []) { (index, element) in
+                ForEach(Array(views.enumerated()), id: \.element) { (index, element) in
                     HStack {
-                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element, onContentUpdate: {
+                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element.value, onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
                         }, onRuntimeUpdate: onRuntimeUpdate, error: $error)
                         .editable(showEditControls, onEdit: {
                             self.showEditIndex = index
                         }, onLongPress: {
-                            UIPasteboard.general.copy(element)
+                            UIPasteboard.general.copy(element.value)
                         })
                         
                         if showEditControls {
@@ -69,15 +74,17 @@ public struct MakeableStackView: View {
             do {
                 switch stack.content.value {
                 case let .constant(array):
-                    self.elements = array.elements.compactMap { $0 as! (any MakeableView) }
+                    let elements = array
+                    self.elements = elements
                 default:
                     if isRunning {
-                        let elements = (try await stack.content.value(with: variables) as ArrayValue).elements.compactMap { $0 as? any MakeableView }
+                        let elements = try await stack.content.value(with: variables) as ArrayValue
                         self.elements = elements
                     } else {
-                        self.elements = [
-                            MakeableLabel.withText(stack.content.protoString, multiline: true)
-                        ]
+                        self.elements = .init(
+                            type: .label,
+                            elements: [MakeableLabel.withText(stack.content.protoString, multiline: true)]
+                        )
                     }
                 }
             } catch let error as VariableValueError {
@@ -97,30 +104,32 @@ public struct MakeableStackView: View {
             AddViewView(viewModel: .init(onSelect: { view in
                 guard let elements = stack.content.value.constant else { return }
                 elements.elements.insert(view, at: index)
-                self.elements?.insert(view as any MakeableView, at: index)
+                self.elements = elements
                 stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
             }))
         }).sheet(item: $showEditIndex, content: { index in
             let elements = stack.content.value.constant!
-            EditViewView(viewModel: .init(editable: elements.elements[index] as! (any MakeableView)) {
-                onUpdate(at: index, with: $0)
-            })
+            NavigationView {
+                EditViewView(title: "Elements", scope: .init(), viewModel: .init(editable: elements.elements[index] as! (any MakeableView)) {
+                    onUpdate(at: index , with: $0)
+                })
+            }
         })
     }
     
     private func onRemove(at index: Int) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements.remove(at: index)
-        self.elements?.remove(at: index)
+        self.elements = elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
     private func onUpdate(at index: Int, with value: any MakeableView) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements[index] = value
-        self.elements?[index] = value
+        self.elements = elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
@@ -132,7 +141,7 @@ public struct MakeableStackView: View {
             guard let view = UIPasteboard.general.pasteValue() as? (any MakeableView) else { return }
             guard let elements = stack.content.value.constant else { return }
             elements.elements.insert(view, at: index)
-            self.elements?.insert(view as any MakeableView, at: index)
+            self.elements = elements
             stack.content = .value(elements)
             onContentUpdate(stack)
         } label: {
@@ -149,9 +158,9 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
     public var valueString: String { "STACK" }
     public var protoString: String { "STACK(\(content.protoString))" }
     
-    public var base: MakeableBase { willSet { objectWillChange.send() } }
-    public var axis: AxisValue { willSet { objectWillChange.send() } }
-    public var content: TypedValue<ArrayValue> { willSet { objectWillChange.send() } }
+    @Published public var base: MakeableBase
+    @Published public var axis: AxisValue
+    @Published public var content: TypedValue<ArrayValue>
     
     public init(base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), content: TypedValue<ArrayValue>) {
         self.base = base
