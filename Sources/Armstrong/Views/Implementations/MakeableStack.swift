@@ -11,7 +11,7 @@ import DylKit
 public struct MakeableStackView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    @ObservedObject var stack: MakeableStack
+    let stack: MakeableStack
     
     let onContentUpdate: (MakeableStack) -> Void
     let onRuntimeUpdate: (@escaping Block) -> Void
@@ -21,11 +21,12 @@ public struct MakeableStackView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @State var elements: ArrayValue = .init(type: .string, elements: [])
+    @StateObject var elements: ArrayValue = .init(type: .string, elements: [])
     var views: [HashableBox<any MakeableView>] {
         elements.elements
             .compactMap { $0 as? any MakeableView }
-            .map { .init($0, hash: { $0.protoString }) }
+            .enumerated()
+            .map { (offset, element) in .init(element, hash: { $0.encoded().string }) }
     }
     
     public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
@@ -75,16 +76,16 @@ public struct MakeableStackView: View {
                 switch stack.content.value {
                 case let .constant(array):
                     let elements = array
-                    self.elements = elements
+                    self.elements.type = elements.type
+                    self.elements.elements = elements.elements
                 default:
                     if isRunning {
                         let elements = try await stack.content.value(with: variables) as ArrayValue
-                        self.elements = elements
+                        self.elements.type = elements.type
+                        self.elements.elements = elements.elements
                     } else {
-                        self.elements = .init(
-                            type: .label,
-                            elements: [MakeableLabel.withText(stack.content.protoString, multiline: true)]
-                        )
+                        self.elements.type = .label
+                        self.elements.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
                     }
                 }
             } catch let error as VariableValueError {
@@ -104,7 +105,8 @@ public struct MakeableStackView: View {
             AddViewView(viewModel: .init(onSelect: { view in
                 guard let elements = stack.content.value.constant else { return }
                 elements.elements.insert(view, at: index)
-                self.elements = elements
+                self.elements.type = elements.type
+                self.elements.elements = elements.elements
                 stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
@@ -122,14 +124,16 @@ public struct MakeableStackView: View {
     private func onRemove(at index: Int) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements.remove(at: index)
-        self.elements = elements
+        self.elements.type = elements.type
+        self.elements.elements = elements.elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
     private func onUpdate(at index: Int, with value: any MakeableView) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements[index] = value
-        self.elements = elements
+        self.elements.type = elements.type
+        self.elements.elements = elements.elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
@@ -141,7 +145,8 @@ public struct MakeableStackView: View {
             guard let view = UIPasteboard.general.pasteValue() as? (any MakeableView) else { return }
             guard let elements = stack.content.value.constant else { return }
             elements.elements.insert(view, at: index)
-            self.elements = elements
+            self.elements.type = elements.type
+            self.elements.elements = elements.elements
             stack.content = .value(elements)
             onContentUpdate(stack)
         } label: {

@@ -93,13 +93,13 @@ public typealias TypeableValue = EditableVariableValue & Codable
 
 
 // sourcery: variableTypeName = "typedValue", skipVariableType
-public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable {
+public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable, ObservableObject {
     
     public static var type: VariableType { fatalError() }
     
     public var type: VariableType { T.type }
     
-    public var value: TypedValueOption<T>
+    public var value: TypedValueOption<T> { didSet { objectWillChange.send() } }
     
     public init(value: TypedValueOption<T>) {
         self.value = value

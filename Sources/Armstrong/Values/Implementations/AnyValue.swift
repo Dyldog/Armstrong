@@ -9,10 +9,10 @@ import SwiftUI
 import DylKit
 
 // sourcery: variableTypeName = "anyValue", skipCodable
-public final class AnyValue: EditableVariableValue {
+public final class AnyValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .anyValue }
-    public var value: any EditableVariableValue
+    public var value: any EditableVariableValue { didSet { objectWillChange.send() } }
     
     public init(value: any EditableVariableValue) {
         if let value = value as? AnyValue {

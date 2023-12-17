@@ -9,9 +9,9 @@ import SwiftUI
 
 // sourcery: skipCodable
 /// A value that provides a value from the variables
-public final class Variable: EditableVariableValue {
+public final class Variable: EditableVariableValue, ObservableObject {
     public static var type: VariableType { .variable }
-    public var value: AnyValue
+    public var value: AnyValue { didSet { objectWillChange.send() } }
     
     public init(value: AnyValue) {
         self.value = value

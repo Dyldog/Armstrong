@@ -11,7 +11,7 @@ import DylKit
 public struct MakeableWrapperView: View {
     let isRunning: Bool
     let showEditControls: Bool
-    var view: any MakeableView
+    let view: any MakeableView
     let onContentUpdate: (any MakeableView) -> Void
     let onRuntimeUpdate: (@escaping Block) -> Void
     @Binding var error: VariableValueError?

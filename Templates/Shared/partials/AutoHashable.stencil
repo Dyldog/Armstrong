@@ -1,0 +1,17 @@
+{% macro AutoHashable type %}
+{% if type|!annotated:"skipHashable" %}
+{% if type.implements.MakeableView %}
+extension {{ type.name }}: Hashable {
+    public func hash(into hasher: inout Hasher) {        
+        {% if type.implements.PickableValue %}
+            hasher.combine(self)
+        {% else %}
+            {% for var in type.storedVariables where not var.defaultValue %}
+            hasher.combine({{ var.name }})
+            {% endfor %}
+        {% endif %}
+    }
+}
+{% endif %}
+{% endif %}
+{% endmacro %}

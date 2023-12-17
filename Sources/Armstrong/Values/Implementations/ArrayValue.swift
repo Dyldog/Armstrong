@@ -13,8 +13,8 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .list }
     
-    public var type: VariableType
-    public var elements: [any EditableVariableValue]
+    public var type: VariableType { didSet { objectWillChange.send() } }
+    public var elements: [any EditableVariableValue] { didSet { objectWillChange.send() } }
     
     public var protoString: String { """
     [

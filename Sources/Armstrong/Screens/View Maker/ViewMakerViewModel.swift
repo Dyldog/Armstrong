@@ -46,7 +46,7 @@ public class ViewMakerViewModel: ObservableObject {
         }
     }
     
-//    @Published private(set) var updater: Int = 0
+    @Published private(set) var updater: Int = 0
     
     @Published private(set) var _variables: Variables
     @Published var error: VariableValueError?
@@ -146,6 +146,7 @@ public class ViewMakerViewModel: ObservableObject {
         Task { @MainActor in
             try await self.updateVariablesFromContent(vars: variables)
             completion()
+            self.updater += 1
         }
     }
     

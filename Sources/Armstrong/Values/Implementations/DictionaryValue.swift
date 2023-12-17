@@ -41,14 +41,14 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
-        var mapped: [StringValue: (any VariableValue)?] = [:]
+        var mapped: [StringValue: any EditableVariableValue] = [:]
         for (key, value) in elements {
             mapped[key] = try await value.value(with: variables)
         }
         
         return DictionaryValue(
             type: type,
-            elements: elements.compactMapValues { $0 }
+            elements: mapped
         )
     }
     
@@ -72,11 +72,12 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         ExpandableStack(scope: scope, title: title) { [weak self] in
                 ProtoText(text: self?.protoString ?? "")
             } content: {
-                DictionaryEditView(scope: scope, title: title, value: .init(get: {
-                    self
-                }, set: {
-                    self.elements = $0.elements
-                }), onUpdate: {
+                DictionaryEditView(scope: scope, title: title, value: .init(get: { [weak self] in
+                    self ?? .makeDefault()
+                }, set: { [weak self] in
+                    self?.elements = $0.elements
+                }), onUpdate: { [weak self] in
+                    guard let self else { return }
                     self.elements = $0.elements
                     onUpdate(self)
                 })

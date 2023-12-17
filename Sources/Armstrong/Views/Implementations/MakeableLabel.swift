@@ -86,13 +86,13 @@ public final class MakeableLabel: MakeableView {
     
     public static var type: VariableType { .label }
         
-    public var text: AnyValue
-    public var fontSize: IntValue
-    public var fontWeight: FontWeightValue
-    public var italic: BoolValue
-    public var base: MakeableBase
-    public var textColor: ColorValue
-    public var isMultiline: BoolValue
+    @Published public var text: AnyValue
+    @Published public var fontSize: IntValue
+    @Published public var fontWeight: FontWeightValue
+    @Published public var italic: BoolValue
+    @Published public var base: MakeableBase
+    @Published public var textColor: ColorValue
+    @Published public var isMultiline: BoolValue
     
     public init(text: AnyValue, fontSize: IntValue, fontWeight: FontWeightValue, italic: BoolValue, base: MakeableBase, textColor: ColorValue, isMultiline: BoolValue) {
         self.text = text
