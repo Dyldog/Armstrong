@@ -8,7 +8,7 @@
 import SwiftUI
 import DylKit
 
-struct ExpandableStack<Header: View, Body: View>: View {
+public struct ExpandableStack<Header: View, Body: View>: View {
     
     let scope: Scope
     var title: String
@@ -17,7 +17,14 @@ struct ExpandableStack<Header: View, Body: View>: View {
     @State var expanded: Bool = false
     @State var sheetPresented: Bool = false
     
-    var body: some View {
+    public init(scope: Scope, title: String, @ViewBuilder headerCollapsed: @escaping () -> Header, @ViewBuilder content: @escaping () -> Body) {
+        self.scope = scope
+        self.title = title
+        self.headerCollapsed = headerCollapsed
+        self.content = content
+    }
+    
+    public var body: some View {
         VStack {
             HStack {
                 VStack {
