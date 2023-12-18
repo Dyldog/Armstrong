@@ -22,12 +22,12 @@ public struct MakeableStackView: View {
     @Binding var error: VariableValueError?
     
     @StateObject var elements: ArrayValue = .init(type: .string, elements: [])
-    var views: [HashableBox<any MakeableView>] {
-        elements.elements
-            .compactMap { $0 as? any MakeableView }
-            .enumerated()
-            .map { (offset, element) in .init(element, hash: { $0.encoded().string }) }
-    }
+//    var views: [HashableBox<any MakeableView>] {
+//        elements.elements
+//            .compactMap { $0 as? any MakeableView }
+//            .enumerated()
+//            .map { (offset, element) in .init(element, hash: { $0.encoded().string }) }
+//    }
     
     public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
@@ -46,18 +46,18 @@ public struct MakeableStackView: View {
                 makeButton(at: 0)
             }
             
-            if views.isEmpty == true, !showEditControls {
+            if elements.elements.isEmpty == true, !showEditControls {
                 Text("STACKs")
             } else {
-                ForEach(Array(views.enumerated()), id: \.element) { (index, element) in
+                ForEach(Array(elements.elements.enumerated())) { (index, element) in
                     HStack {
-                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element.value, onContentUpdate: {
+                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element as! (any MakeableView), onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
                         }, onRuntimeUpdate: onRuntimeUpdate, error: $error)
                         .editable(showEditControls, onEdit: {
                             self.showEditIndex = index
                         }, onLongPress: {
-                            UIPasteboard.general.copy(element.value)
+                            UIPasteboard.general.copy(element)
                         })
                         
                         if showEditControls {
@@ -160,6 +160,8 @@ public struct MakeableStackView: View {
 public final class MakeableStack: MakeableView, Codable, ObservableObject {
     public static var type: VariableType { .stack }
     
+    public let id: UUID
+    
     public var valueString: String { "STACK" }
     public var protoString: String { "STACK(\(content.protoString))" }
     
@@ -167,18 +169,20 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
     @Published public var axis: AxisValue
     @Published public var content: TypedValue<ArrayValue>
     
-    public init(base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), content: TypedValue<ArrayValue>) {
+    public init(id: UUID, base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), content: TypedValue<ArrayValue>) {
+        self.id = id
         self.base = base
         self.content = content
         self.axis = axis
     }
     
-    public convenience init(base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), elements: ArrayValue) {
-        self.init(base: base, axis: axis, content: .value(elements))
+    public convenience init(id: UUID, base: MakeableBase = .makeDefault(), axis: AxisValue = .init(value: .vertical), elements: ArrayValue) {
+        self.init(id: id, base: base, axis: axis, content: .value(elements))
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
         MakeableStack(
+            id: id,
             base: try await base.value(with: variables),
             axis: try await axis.value(with: variables),
             content: .value(try await content.value(with: variables))
@@ -215,6 +219,7 @@ extension MakeableStack: CodeRepresentable {
 extension MakeableStack {
     public convenience init(axis: Axis = .vertical, _ elements: [any MakeableView]) {
         self.init(
+            id: .init(),
             base: .makeDefault(),
             axis: .init(value: axis),
             content: .value(.init(type: .base, elements: elements))

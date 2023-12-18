@@ -13,7 +13,11 @@ extension {{ type.name }} {
         {% if type.implements.CompositeEditableVariableValue %}
         self.init(
         {% for var in type.storedVariables where not var.defaultValue %}
+            {% if var.name == "id" %}
+            id: (try? valueContainer.decode({{ var.typeName }}.self, forKey: .{{ var.name }})) ?? UUID(),
+            {% else %}
             {{ var.name }}: (try? valueContainer.decode({{ var.typeName }}.self, forKey: .{{ var.name }})) ?? Properties.{{ var.name }}.defaultValue as! {{ var.typeName }}{{ "," if not forloop.last }}
+            {% endif %}
         {% endfor %}
         )
         {% else %}

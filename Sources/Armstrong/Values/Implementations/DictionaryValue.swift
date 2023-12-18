@@ -14,21 +14,21 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     public static var type: VariableType { .dictionary }
     
     public var type: VariableTypeValue
-    public var elements: [StringValue: any EditableVariableValue]
+    public var elements: [String: any EditableVariableValue]
     
     public var protoString: String {
         """
         {
-        \(elements.map { "\t\($0.key.protoString): \($0.value.protoString)" }.joined(separator: ", "))
+        \(elements.map { "\t\($0.key): \($0.value.protoString)" }.joined(separator: ", "))
         }
         """
     }
     
     public var valueString: String {
-        elements.map { "\($0.key.valueString): \($0.value.valueString)" }.joined(separator: ", ")
+        elements.map { "\($0.key): \($0.value.valueString)" }.joined(separator: ", ")
     }
     
-    public init(type: VariableTypeValue, elements: [StringValue: any EditableVariableValue]) {
+    public init(type: VariableTypeValue, elements: [String: any EditableVariableValue]) {
         self.type = type
         self.elements = elements
     }
@@ -36,12 +36,12 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     public static func makeDefault() -> DictionaryValue {
         .init(
             type: VariableTypeValue(value: .string),
-            elements: [StringValue: any EditableVariableValue]()
+            elements: [String: any EditableVariableValue]()
         )
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
-        var mapped: [StringValue: any EditableVariableValue] = [:]
+        var mapped: [String: any EditableVariableValue] = [:]
         for (key, value) in elements {
             mapped[key] = try await value.value(with: variables)
         }
@@ -61,8 +61,8 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         }
     }
     
-    public func update(oldKey: StringValue, to newKey: StringValue) throws -> VariableValue {
-        guard let value = elements[oldKey] else { throw VariableValueError.valueNotFoundForVariable(oldKey.protoString) }
+    public func update(oldKey: String, to newKey: String) throws -> VariableValue {
+        guard let value = elements[oldKey] else { throw VariableValueError.valueNotFoundForVariable(oldKey) }
         elements.removeValue(forKey: oldKey)
         elements[newKey] = value
         return self
@@ -112,7 +112,7 @@ extension DictionaryValue {
     public static func from(_ dictionary: [String: Any]) -> DictionaryValue {
         return DictionaryValue(
             type: VariableTypeValue(value: .string),
-            elements: dictionary.reduce(into: [StringValue: any EditableVariableValue](), {
+            elements: dictionary.reduce(into: [String: any EditableVariableValue](), {
                 let value: VariableValue
                 switch $1.value {
                 case let float as Float: value = FloatValue(value: float)
@@ -126,7 +126,7 @@ extension DictionaryValue {
                 default: fatalError()
                 }
                 
-                $0[StringValue(value: $1.key)] = value as? any EditableVariableValue
+                $0[$1.key] = value as? any EditableVariableValue
             })
         )
     }
@@ -136,7 +136,7 @@ extension DictionaryValue: CodeRepresentable {
     public var codeRepresentation: String {
         """
         [
-        \(elements.map { "\t\($0.key.codeRepresentation): \($0.value.codeRepresentation)"})
+        \(elements.map { "\t\($0): \($0.value.codeRepresentation)"})
         ]
         """
     }

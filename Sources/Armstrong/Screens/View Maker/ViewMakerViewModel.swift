@@ -18,12 +18,11 @@ public class ViewMakerViewModel: ObservableObject {
             objectWillChange.send()
         }
         didSet {
-            onUpdate?(.init(id: screenID, name: self.name, initActions: self.initActions, content: content))
+            onUpdate?(screen)
         }
     }
     
-    let screenID: UUID
-    @Published private(set) var initActions: StepArray = .init(value: [])
+    @Published private(set) var screen: Screen
     private let onUpdate: ((Screen) -> Void)?
     var showEdit: Bool { onUpdate != nil }
     
@@ -66,9 +65,8 @@ public class ViewMakerViewModel: ObservableObject {
     }
     
     public init(screen: Screen, makeMode: Bool, onUpdate: ((Screen) -> Void)?) {
-        self.screenID = screen.id
+        self.screen = screen
         self.name = screen.name
-        self.initActions = screen.initActions
         self.content = screen.content
         self.onUpdate = onUpdate
         self._variables = .init()
@@ -105,46 +103,20 @@ public class ViewMakerViewModel: ObservableObject {
 //        }.store(in: &cancellables)
     }
     
-    private func updateVariablesFromContent(vars: Variables) async throws {
-        for element in content.content.value.constant?.elements ?? [] {
-            guard let element = element as? (any MakeableView) else { return }
-            try? await element.insertValues(into: vars)
-        }
-        
-        self.variables = vars
-        
-//        self.updater += 1
-    }
-    
     func makeNewVariables() async throws {
         self._variables = try await self.makeVariables()
     }
     
     func makeVariables() async throws -> Variables {
         let newVars = Variables()
-        
-        for action in initActions {
-            do {
-                try await action.run(with: newVars)
-            } catch {
-                print(error)
-            }
-        }
-        
-        newVars.removeReturnVariable()
-        
-        try await self.updateVariablesFromContent(vars: newVars)
-        
-        newVars.removeReturnVariable()
-        
+        try await screen.initialise(with: newVars)
         hasFinishedFirstLoad = true
-        
         return newVars
     }
     
     func onRuntimeUpdate(completion: @escaping Block) {
         Task { @MainActor in
-            try await self.updateVariablesFromContent(vars: variables)
+            try await screen.updateVariablesFromContent(vars: variables)
             completion()
             self.updater += 1
         }
@@ -152,9 +124,17 @@ public class ViewMakerViewModel: ObservableObject {
     
     func updateInitActions(_ newValue: StepArray) {
         Task { @MainActor in
-            self.initActions = newValue
+            screen.initActions = newValue
             try await makeNewVariables()
-            onUpdate?(.init(id: screenID, name: self.name, initActions: self.initActions, content: self.content))
+            onUpdate?(screen)
+        }
+    }
+    
+    func updateInitVariables(_ newValue: DictionaryValue) {
+        Task { @MainActor in
+            screen.initVariables = newValue
+            try await makeNewVariables()
+            onUpdate?(screen)
         }
     }
 }

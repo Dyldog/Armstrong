@@ -1,6 +1,53 @@
 // Generated using Sourcery 2.0.2 — https://github.com/krzysztofzablocki/Sourcery
 // DO NOT EDIT
 
+
+
+public class Armstrong: AAProvider {
+    public static var steps: [any StepType.Type] {
+    [
+        SetVarStep.self
+    ]
+    }
+    public static var values: [any EditableVariableValue.Type] {
+    [
+    AnyMakeableView.self,
+    AnyValue.self,
+    ArrayValue.self,
+    BoolValue.self,
+    ColorValue.self,
+    DictionaryValue.self,
+    MakeableBase.self,
+    MakeableLabel.self,
+    MakeableStack.self,
+    NilValue.self,
+    NumericalOperationTypeValue.self,
+    NumericalOperationValue.self,
+    ResultValue.self,
+    ScreenNameValue.self,
+    ScreenValue.self,
+    SetVarStep.self,
+    StepArray.self,
+    StringValue.self,
+    Variable.self,
+    VariableTypeValue.self,
+    FloatValue.self,
+    IntValue.self,
+    AxisValue.self,
+    FontWeightValue.self,
+    NumericTypeValue.self
+    ]
+    }
+    public static var views: [any MakeableView.Type] {
+    [
+    MakeableBase.self,
+    MakeableLabel.self,
+    MakeableStack.self,
+    ScreenValue.self
+    ]
+    }
+}
+
 public enum NumericType: String, Codable, CaseIterable {
     public static var defaultValue: NumericType = .int
     public var title: String { rawValue.capitalized }
@@ -27,47 +74,6 @@ extension NumericType: CodeRepresentable {
 
 
 
-public class Armstrong: AAProvider {
-    public static var steps: [any StepType.Type] {
-    [
-        SetVarStep.self
-    ]
-    }
-    public static var values: [any EditableVariableValue.Type] {
-    [
-    AnyMakeableView.self,
-    AnyValue.self,
-    ArrayValue.self,
-    BoolValue.self,
-    ColorValue.self,
-    DictionaryValue.self,
-    MakeableBase.self,
-    MakeableLabel.self,
-    MakeableStack.self,
-    NilValue.self,
-    NumericalOperationTypeValue.self,
-    NumericalOperationValue.self,
-    ResultValue.self,
-    SetVarStep.self,
-    StepArray.self,
-    StringValue.self,
-    Variable.self,
-    VariableTypeValue.self,
-    FloatValue.self,
-    IntValue.self,
-    AxisValue.self,
-    FontWeightValue.self,
-    NumericTypeValue.self
-    ]
-    }
-    public static var views: [any MakeableView.Type] {
-    [
-    MakeableBase.self,
-    MakeableLabel.self,
-    MakeableStack.self
-    ]
-    }
-}
 
 import SwiftUI
 import DylKit
@@ -87,6 +93,11 @@ extension MakeableLabel {
 extension MakeableStack {
     public func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
         MakeableStackView(isRunning: isRunning, showEditControls: showEditControls, stack: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    }
+}
+extension ScreenValue {
+    public func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        ScreenValueView(isRunning: isRunning, showEditControls: showEditControls, screen: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }
 
@@ -563,6 +574,7 @@ extension MakeableBase {
 extension MakeableLabel: Copying {
     public func copy() -> MakeableLabel {
         return MakeableLabel(
+                    id: id,
                     text: text.copy(),
                     fontSize: fontSize,
                     fontWeight: fontWeight,
@@ -597,6 +609,7 @@ extension MakeableLabel {
     }
     public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
         .init(
+            id: UUID(),
             text: factory(.text) as! AnyValue,
             fontSize: factory(.fontSize) as! IntValue,
             fontWeight: factory(.fontWeight) as! FontWeightValue,
@@ -609,6 +622,7 @@ extension MakeableLabel {
 
     public static func makeDefault() -> Self {
         .init(
+            id: UUID(),
             text: Properties.text.defaultValue as! AnyValue,
             fontSize: Properties.fontSize.defaultValue as! IntValue,
             fontWeight: Properties.fontWeight.defaultValue as! FontWeightValue,
@@ -649,6 +663,7 @@ extension VariableType {
 
 extension MakeableLabel {
     enum CodingKeys: String, CodingKey {
+        case id
         case text
         case fontSize
         case fontWeight
@@ -661,6 +676,7 @@ extension MakeableLabel {
     public convenience init(from decoder: Decoder) throws {
         let valueContainer = try decoder.container(keyedBy: CodingKeys.self)
         self.init(
+            id: (try? valueContainer.decode(UUID.self, forKey: .id)) ?? UUID(),
             text: (try? valueContainer.decode(AnyValue.self, forKey: .text)) ?? Properties.text.defaultValue as! AnyValue,
             fontSize: (try? valueContainer.decode(IntValue.self, forKey: .fontSize)) ?? Properties.fontSize.defaultValue as! IntValue,
             fontWeight: (try? valueContainer.decode(FontWeightValue.self, forKey: .fontWeight)) ?? Properties.fontWeight.defaultValue as! FontWeightValue,
@@ -672,6 +688,7 @@ extension MakeableLabel {
     }
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
         try container.encode(text, forKey: .text)
         try container.encode(fontSize, forKey: .fontSize)
         try container.encode(fontWeight, forKey: .fontWeight)
@@ -687,6 +704,7 @@ extension MakeableLabel {
 extension MakeableStack: Copying {
     public func copy() -> MakeableStack {
         return MakeableStack(
+                    id: id,
                     base: base.copy(),
                     axis: axis,
                     content: content.copy()
@@ -709,6 +727,7 @@ extension MakeableStack {
     }
     public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
         .init(
+            id: UUID(),
             base: factory(.base) as! MakeableBase,
             axis: factory(.axis) as! AxisValue,
             content: factory(.content) as! TypedValue<ArrayValue>
@@ -717,6 +736,7 @@ extension MakeableStack {
 
     public static func makeDefault() -> Self {
         .init(
+            id: UUID(),
             base: Properties.base.defaultValue as! MakeableBase,
             axis: Properties.axis.defaultValue as! AxisValue,
             content: Properties.content.defaultValue as! TypedValue<ArrayValue>
@@ -745,6 +765,7 @@ extension VariableType {
 
 extension MakeableStack {
     enum CodingKeys: String, CodingKey {
+        case id
         case base
         case axis
         case content
@@ -753,6 +774,7 @@ extension MakeableStack {
     public convenience init(from decoder: Decoder) throws {
         let valueContainer = try decoder.container(keyedBy: CodingKeys.self)
         self.init(
+            id: (try? valueContainer.decode(UUID.self, forKey: .id)) ?? UUID(),
             base: (try? valueContainer.decode(MakeableBase.self, forKey: .base)) ?? Properties.base.defaultValue as! MakeableBase,
             axis: (try? valueContainer.decode(AxisValue.self, forKey: .axis)) ?? Properties.axis.defaultValue as! AxisValue,
             content: (try? valueContainer.decode(TypedValue<ArrayValue>.self, forKey: .content)) ?? Properties.content.defaultValue as! TypedValue<ArrayValue>
@@ -760,6 +782,7 @@ extension MakeableStack {
     }
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
         try container.encode(base, forKey: .base)
         try container.encode(axis, forKey: .axis)
         try container.encode(content, forKey: .content)
@@ -926,6 +949,108 @@ extension ResultValue {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(steps, forKey: .steps)
+    }
+}
+
+// ScreenNameValue
+
+extension ScreenNameValue: Copying {
+    public func copy() -> ScreenNameValue {
+        return ScreenNameValue(
+                    value: value
+        )
+    }
+}
+
+
+extension VariableType {
+    public static var screenName: VariableType { .init(title: "ScreenName") } // ScreenNameValue
+}
+
+extension ScreenNameValue {
+    enum CodingKeys: String, CodingKey {
+        case value
+    }
+
+    public convenience init(from decoder: Decoder) throws {
+        let valueContainer = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            value: (try? valueContainer.decode(String.self, forKey: .value)) ?? Self.makeDefault().value
+        )
+    }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value, forKey: .value)
+    }
+}
+
+// ScreenValue
+
+extension ScreenValue: Copying {
+    public func copy() -> ScreenValue {
+        return ScreenValue(
+                    id: id,
+                    name: name.copy()
+        )
+    }
+}
+
+extension ScreenValue {
+     public enum Properties: String, ViewProperty {
+        case name
+        public var defaultValue: any EditableVariableValue {
+            switch self {
+            case .name: return ScreenValue.defaultValue(for: .name)
+            }
+        }
+    }
+    public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
+        .init(
+            id: UUID(),
+            name: factory(.name) as! ScreenNameValue
+        )
+    }
+
+    public static func makeDefault() -> Self {
+        .init(
+            id: UUID(),
+            name: Properties.name.defaultValue as! ScreenNameValue
+        )
+    }
+    public func value(for property: Properties) -> any EditableVariableValue {
+        switch property {
+            case .name: return name
+        }
+    }
+
+    public func set(_ value: Any, for property: Properties) {
+        switch property {
+            case .name: self.name = value as! ScreenNameValue
+        }
+    }
+}
+
+extension VariableType {
+    public static var screen: VariableType { .init(title: "Screen") } // ScreenValue
+}
+
+extension ScreenValue {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+    }
+
+    public convenience init(from decoder: Decoder) throws {
+        let valueContainer = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: (try? valueContainer.decode(UUID.self, forKey: .id)) ?? UUID(),
+            name: (try? valueContainer.decode(ScreenNameValue.self, forKey: .name)) ?? Properties.name.defaultValue as! ScreenNameValue
+        )
+    }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
     }
 }
 
@@ -1117,9 +1242,6 @@ extension VariableTypeValue {
         try container.encode(value, forKey: .value)
     }
 }
-
-
-
 
 
 

@@ -4,7 +4,9 @@ extension {{ type.name }} {
      public enum Properties: String, ViewProperty {
         {% for property in type.storedVariables %}
             {% if not property.defaultValue %}
+            {% if property.name != "id" %}
         case {{ property.name }}
+            {% endif %}
             {% endif %}
         {% endfor %}
         
@@ -12,7 +14,9 @@ extension {{ type.name }} {
             switch self {
         {% for property in type.storedVariables %}
             {% if not property.defaultValue %}
+            {% if property.name != "id" %}
             case .{{ property.name }}: return {{ type.name }}.defaultValue{% if type.implements.CompositeEditableVariableValue %}(for: .{{ property.name }}){% endif %}
+            {% endif %}
             {% endif %}
         {% endfor %}
             }
@@ -23,7 +27,11 @@ extension {{ type.name }} {
         .init(
     {% for property in type.storedVariables %}
         {% if not property.defaultValue %}
+        {% if property.name == "id" %}
+            id: UUID(),
+        {% else %}
             {{ property.name }}: factory(.{{ property.name }}) as! {{ property.typeName }}{{ ',' if not forloop.last }}
+        {% endif %}
         {% endif %}
     {% endfor %}
         )
@@ -33,7 +41,11 @@ extension {{ type.name }} {
         .init(
     {% for property in type.storedVariables %}
         {% if not property.defaultValue %}
+        {% if property.name == "id" %}
+            id: UUID(),
+        {% else %}
             {{ property.name }}: Properties.{{ property.name }}.defaultValue as! {{ property.typeName }}{{ ',' if not forloop.last }}
+        {% endif %}
         {% endif %}
     {% endfor %}
         )
@@ -44,7 +56,9 @@ extension {{ type.name }} {
         {% if forloop.first %}
         switch property {
         {% endif %}
+        {% if property.name != "id" %}
             case .{{ property.name }}: return {{ property.name }}
+        {% endif %}
         {% if forloop.last %}
         }
         {% endif %}
@@ -56,7 +70,9 @@ extension {{ type.name }} {
         {% if forloop.first %}
         switch property {
         {% endif %}
+        {% if property.name != "id" %}
             case .{{ property.name }}: self.{{ property.name }} = value as! {{ property.typeName }}
+        {% endif %}
         {% if forloop.last %}
         }
         {% endif %}

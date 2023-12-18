@@ -37,7 +37,7 @@ public final class StringValue: EditableVariableValue {
             TextField("", text: .init(get: { [weak self] in
                 self?.value ?? "ERROR666"
             }, set: { [weak self] in
-                guard let self = self else { return }
+                guard let self = self, self.value != $0 else { return }
                 self.value = $0
                 onUpdate(self)
             }))
@@ -50,12 +50,6 @@ public final class StringValue: EditableVariableValue {
     
     public static func == (lhs: StringValue, rhs: StringValue) -> Bool {
         return lhs.value == rhs.value
-    }
-}
-
-extension StringValue: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(value)
     }
 }
 

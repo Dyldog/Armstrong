@@ -8,14 +8,14 @@
 import Foundation
 
 public struct CodableVariableDictionary: Codable {
-    public let variables: [StringValue: CodableVariableValue]
-    public var values: [StringValue: any EditableVariableValue] { variables.mapValues { $0.value } }
+    public let variables: [String: CodableVariableValue]
+    public var values: [String: any EditableVariableValue] { variables.mapValues { $0.value } }
     
-    public init(variables: [StringValue: CodableVariableValue]) {
+    public init(variables: [String: CodableVariableValue]) {
         self.variables = variables
     }
     
-    public init(variables: [StringValue: any EditableVariableValue]) {
+    public init(variables: [String: any EditableVariableValue]) {
         self.variables = variables.mapValues { .init(value: $0) }
     }
 }

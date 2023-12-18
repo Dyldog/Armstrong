@@ -30,24 +30,25 @@ struct DictionaryEditView: View {
                 )
             }
             
-            ForEach(value.elements.map { ($0.key, $0.value) }, id: \.0) { (key, value) in
+            ForEach(enumerated: value.elements.map { (StringValue(value: $0.key), $0.value) }) { (index, element) in
                 HStack {
                     VStack {
-                        key.editView(scope: scope, title: "Key", onUpdate: { editedElement in
+                        let oldKey = element.0.value
+                        element.0.editView(scope: scope, title: "Key", onUpdate: { editedElement in
                             onMain {
-                                _ = try? self.value.update(oldKey: key, to: editedElement)
+                                _ = try? self.value.update(oldKey: oldKey, to: editedElement.value)
                                 onUpdate(self.value)
                             }
                         })
                         
-                        value.editView(scope: scope, title: "Value", onUpdate: { editedElement in
-                            self.value.elements[key] = editedElement
+                        element.1.editView(scope: scope, title: "Value", onUpdate: { editedElement in
+                            self.value.elements[element.0.value] = editedElement
                             onUpdate(self.value)
                         })
                     }
                     
                     ElementDeleteButton(color: scope.color) {
-                        self.value.elements.removeValue(forKey: key)
+                        self.value.elements.removeValue(forKey: element.0.value)
                         onUpdate(self.value)
                     }
                 }
@@ -61,7 +62,7 @@ struct DictionaryEditView: View {
     func addButton() -> some View {
         SwiftUI.Button {
             guard let type = value.type.value.editableType else { return }
-            value.elements[StringValue(value: "_NEW_")] = type.makeDefault()
+            value.elements["_NEW_"] = type.makeDefault()
             onUpdate(value)
         } label: {
             Image(systemName: "plus.app.fill").scope(scope)

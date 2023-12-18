@@ -85,6 +85,8 @@ public struct MakeableLabelView: View {
 public final class MakeableLabel: MakeableView {
     
     public static var type: VariableType { .label }
+    
+    public let id: UUID
         
     @Published public var text: AnyValue
     @Published public var fontSize: IntValue
@@ -94,7 +96,8 @@ public final class MakeableLabel: MakeableView {
     @Published public var textColor: ColorValue
     @Published public var isMultiline: BoolValue
     
-    public init(text: AnyValue, fontSize: IntValue, fontWeight: FontWeightValue, italic: BoolValue, base: MakeableBase, textColor: ColorValue, isMultiline: BoolValue) {
+    public init(id: UUID, text: AnyValue, fontSize: IntValue, fontWeight: FontWeightValue, italic: BoolValue, base: MakeableBase, textColor: ColorValue, isMultiline: BoolValue) {
+        self.id = id
         self.text = text
         self.fontSize = fontSize
         self.fontWeight = fontWeight
@@ -108,6 +111,7 @@ public final class MakeableLabel: MakeableView {
         _ string: String, fontSize: Int = 18, bold: Bool = false, multiline: Bool = false
     ) -> MakeableLabel {
         .init(
+            id: .init(),
             text: AnyValue(value: StringValue(value: string)),
             fontSize: IntValue(value: fontSize),
             fontWeight: .init(value: bold ? .bold : .regular),
@@ -128,6 +132,7 @@ public final class MakeableLabel: MakeableView {
 
     public func value(with variables: Variables) async throws -> VariableValue {
         await MakeableLabel(
+            id: id,
             text: (try text.value(with: variables) as (any EditableVariableValue)).any,
             fontSize: try fontSize.value(with: variables),
             fontWeight: try fontWeight.value(with: variables),
@@ -165,6 +170,6 @@ extension MakeableLabel: CodeRepresentable {
 
 extension MakeableLabel {
     public static func text(_ text: AnyValue, size: Int = 18) -> MakeableLabel {
-        .init(text: text, fontSize: .int(size), fontWeight: .init(value: .regular), italic: .init(value: false), base: .makeDefault(), textColor: .init(value: .black), isMultiline: .false)
+        .init(id: .init(), text: text, fontSize: .int(size), fontWeight: .init(value: .regular), italic: .init(value: false), base: .makeDefault(), textColor: .init(value: .black), isMultiline: .false)
     }
 }

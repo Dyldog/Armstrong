@@ -10,6 +10,8 @@ import DylKit
 
 public final class MakeableBase: MakeableView, Codable {
     
+    public let id: UUID = .init()
+    
     public static var type: VariableType { .base }
         
     public var padding: IntValue

@@ -11,6 +11,7 @@ public protocol AAProvider {
     static var steps: [any StepType.Type] { get }
     static var values: [any EditableVariableValue.Type] { get }
     static var views: [any MakeableView.Type] { get }
+    static var demoScreens: [Screen] { get }
 }
 
 public class AALibrary {
@@ -26,6 +27,15 @@ public class AALibrary {
     }
     public var views: [any MakeableView.Type] {
         providers.flatMap { $0.views }.sorted(by: { $0.type.title < $1.type.title })
+    }
+    public var demoScreens: [Screen] {
+        providers.flatMap { $0.demoScreens }.sorted(by: { $0.name < $1.name })
+    }
+    public var userScreens: [Screen] {
+        Screen.screens
+    }
+    public var allScreens: [Screen] {
+        userScreens + demoScreens
     }
     
     public func addProviders(_ providers: [AAProvider.Type]) {
