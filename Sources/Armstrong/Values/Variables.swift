@@ -41,6 +41,13 @@ public final class Variables: Equatable, ObservableObject, Hashable, Identifiabl
         }
     }
     
+    @MainActor public func set(from dictionary: DictionaryValue) {
+        objectWillChange.send()
+        for value in dictionary.elements {
+            set(value.value, for: value.key)
+        }
+    }
+    
     @MainActor public static func == (lhs: Variables, rhs: Variables) -> Bool {
         let isEqual = (lhs.keyString == rhs.keyString) && (lhs.valueString == rhs.valueString)
         return isEqual

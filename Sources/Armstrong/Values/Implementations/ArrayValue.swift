@@ -39,13 +39,13 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
-        var mapped: [(any EditableVariableValue)?] = []
+        var mapped: [any EditableVariableValue] = []
         for element in elements {
-            mapped.append(try await element.value(with: variables) as? (any EditableVariableValue))
+            mapped.append(try await element.value(with: variables))
         }
         return ArrayValue(
             type: type,
-            elements: mapped.compactMap { $0 }
+            elements: mapped
         )
     }
     

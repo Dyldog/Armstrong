@@ -34,7 +34,6 @@ public struct MakeableLabelView: View {
         self.label = label
         self.onContentUpdate = onContentUpdate
         self.onRuntimeUpdate = onRuntimeUpdate
-        self._variables = .init()
         self._error = error
     }
     

@@ -9,10 +9,10 @@ import SwiftUI
 import DylKit
 
 // sourcery: variableTypeName = "view", skipCodable
-public final class AnyMakeableView: EditableVariableValue {
+public final class AnyMakeableView: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .view }
-    public var value: any MakeableView
+    @Published public var value: any MakeableView
     
     public var protoString: String { value.protoString }
     public var valueString: String { value.valueString }
@@ -39,13 +39,13 @@ public final class AnyMakeableView: EditableVariableValue {
                 Text("Type").bold().scope(scope)
                 Spacer()
                 Picker("", selection: .init(get: {
-                    HashableBox(Swift.type(of: self.value), hash: { $0.type })
+                    Swift.type(of: self.value).type
                 }, set: { new in
-                    self.value = new.value.makeDefault()
+                    self.value = new.editableType?.makeDefault() as! any MakeableView
                     onUpdate(self)
                 })) {
-                    ForEach(AALibrary.shared.views.map { $0.type }) {
-                        Text($0.title).tag($0)
+                    ForEach(AALibrary.shared.views) {
+                        Text($0.type.title).tag($0.type)
                     }
                 }
                 .pickerScope(scope)

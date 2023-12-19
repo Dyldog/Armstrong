@@ -56,18 +56,19 @@ public struct Screen: Codable, Identifiable {
 }
 
 extension Screen {
-    func initialise(with vars: Variables) async throws {
-        try await setInitVars(in: vars)
+    func initialise(with vars: Variables, useInputVarsForInit: Bool = false) async throws {
+        
+        if !useInputVarsForInit {
+            try await setInitVars(in: vars)
+        }
         try await runInitActions(with: vars)
-        await vars.removeReturnVariable()
+//        await vars.removeReturnVariable()
         try await updateVariablesFromContent(vars: vars)
-        await vars.removeReturnVariable()
+//        await vars.removeReturnVariable()
     }
     
     func setInitVars(in vars: Variables) async throws {
-        for value in initVariables.elements {
-            await vars.set(value.value, for: value.key)
-        }
+        await vars.set(from: initVariables)
     }
     
     func runInitActions(with vars: Variables) async throws {

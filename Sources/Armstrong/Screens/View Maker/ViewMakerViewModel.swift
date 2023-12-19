@@ -11,7 +11,7 @@ import Combine
 
 @MainActor
 public class ViewMakerViewModel: ObservableObject {
-    let name: String
+    @Published var title: String
     
     var content: MakeableStack {
         willSet {
@@ -66,7 +66,7 @@ public class ViewMakerViewModel: ObservableObject {
     
     public init(screen: Screen, makeMode: Bool, onUpdate: ((Screen) -> Void)?) {
         self.screen = screen
-        self.name = screen.name
+        self.title = screen.name
         self.content = screen.content
         self.onUpdate = onUpdate
         self._variables = .init()
@@ -91,6 +91,14 @@ public class ViewMakerViewModel: ObservableObject {
         _variables.objectWillChange.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
+        
+        $title.dropFirst().sink { [weak self] in
+            guard let self else { return }
+            self.screen.name = $0
+            self.onUpdate?(self.screen)
+            
+        }
+        .store(in: &cancellables)
         
 //        $content.dropFirst().sink { content in
 //            onUpdate(.init(name: self.name, initActions: self.initActions, content: content))
@@ -118,7 +126,7 @@ public class ViewMakerViewModel: ObservableObject {
         Task { @MainActor in
             try await screen.updateVariablesFromContent(vars: variables)
             completion()
-            self.updater += 1
+//            self.updater += 1
         }
     }
     

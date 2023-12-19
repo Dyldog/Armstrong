@@ -16,20 +16,6 @@ struct DictionaryEditView: View {
     
     var body: some View {
         VStack {
-            HStack {
-                Text("Type")
-                    .bold()
-                    .scope(scope)
-                
-                Spacer()
-                value.type.editView(
-                    scope: scope, title: title, onUpdate: {
-                        self.value.type = $0
-                        onUpdate(value)
-                    }
-                )
-            }
-            
             ForEach(enumerated: value.elements.map { (StringValue(value: $0.key), $0.value) }) { (index, element) in
                 HStack {
                     VStack {
@@ -61,8 +47,8 @@ struct DictionaryEditView: View {
     
     func addButton() -> some View {
         SwiftUI.Button {
-            guard let type = value.type.value.editableType else { return }
-            value.elements["_NEW_"] = type.makeDefault()
+            let type: EditableVariableValue.Type = (value.elements.values.reversed().first.map { Swift.type(of: $0) } ?? StringValue.self)
+            value.elements["_NEW_"] = type.makeDefault().any
             onUpdate(value)
         } label: {
             Image(systemName: "plus.app.fill").scope(scope)

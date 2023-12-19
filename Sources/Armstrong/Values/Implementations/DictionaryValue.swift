@@ -13,8 +13,7 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .dictionary }
     
-    public var type: VariableTypeValue
-    public var elements: [String: any EditableVariableValue]
+    public var elements: [String: AnyValue]
     
     public var protoString: String {
         """
@@ -28,32 +27,29 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         elements.map { "\($0.key): \($0.value.valueString)" }.joined(separator: ", ")
     }
     
-    public init(type: VariableTypeValue, elements: [String: any EditableVariableValue]) {
-        self.type = type
+    public init(elements: [String: AnyValue]) {
         self.elements = elements
     }
     
     public static func makeDefault() -> DictionaryValue {
         .init(
-            type: VariableTypeValue(value: .string),
-            elements: [String: any EditableVariableValue]()
+            elements: [String: AnyValue]()
         )
     }
     
     public func value(with variables: Variables) async throws -> VariableValue {
-        var mapped: [String: any EditableVariableValue] = [:]
+        var mapped: [String: AnyValue] = [:]
         for (key, value) in elements {
-            mapped[key] = try await value.value(with: variables)
+            mapped[key] = AnyValue(value: try await value.value(with: variables))
         }
         
         return DictionaryValue(
-            type: type,
             elements: mapped
         )
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue {
-        if let otherArray = other as? DictionaryValue, otherArray.type.value == type.value {
+        if let otherArray = other as? DictionaryValue {
             elements.merge(otherArray.elements, uniquingKeysWith: { _, new in new })
             return self
         } else {
@@ -95,7 +91,6 @@ extension DictionaryValue: Codable {
     public convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.init(
-            type: try container.decode(VariableTypeValue.self, forKey: .type),
             elements: try container.decode(CodableVariableDictionary.self, forKey: .elements).values
         )
     }
@@ -103,7 +98,6 @@ extension DictionaryValue: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(CodableVariableDictionary(variables: elements), forKey: .elements)
-        try container.encode(type, forKey: .type)
     }
 }
 
@@ -111,8 +105,7 @@ extension DictionaryValue: Codable {
 extension DictionaryValue {
     public static func from(_ dictionary: [String: Any]) -> DictionaryValue {
         return DictionaryValue(
-            type: VariableTypeValue(value: .string),
-            elements: dictionary.reduce(into: [String: any EditableVariableValue](), {
+            elements: dictionary.reduce(into: [String: AnyValue](), {
                 let value: VariableValue
                 switch $1.value {
                 case let float as Float: value = FloatValue(value: float)
@@ -126,7 +119,7 @@ extension DictionaryValue {
                 default: fatalError()
                 }
                 
-                $0[$1.key] = value as? any EditableVariableValue
+                $0[$1.key] = (value as? any EditableVariableValue)?.any
             })
         )
     }

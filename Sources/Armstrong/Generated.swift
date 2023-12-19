@@ -473,7 +473,6 @@ extension ColorValue {
 extension DictionaryValue: Copying {
     public func copy() -> DictionaryValue {
         return DictionaryValue(
-                    type: type.copy(),
                     elements: elements
         )
     }
@@ -990,7 +989,8 @@ extension ScreenValue: Copying {
     public func copy() -> ScreenValue {
         return ScreenValue(
                     id: id,
-                    name: name.copy()
+                    name: name.copy(),
+                    arguments: arguments.copy()
         )
     }
 }
@@ -998,34 +998,40 @@ extension ScreenValue: Copying {
 extension ScreenValue {
      public enum Properties: String, ViewProperty {
         case name
+        case arguments
         public var defaultValue: any EditableVariableValue {
             switch self {
             case .name: return ScreenValue.defaultValue(for: .name)
+            case .arguments: return ScreenValue.defaultValue(for: .arguments)
             }
         }
     }
     public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
         .init(
             id: UUID(),
-            name: factory(.name) as! ScreenNameValue
+            name: factory(.name) as! ScreenNameValue,
+            arguments: factory(.arguments) as! DictionaryValue
         )
     }
 
     public static func makeDefault() -> Self {
         .init(
             id: UUID(),
-            name: Properties.name.defaultValue as! ScreenNameValue
+            name: Properties.name.defaultValue as! ScreenNameValue,
+            arguments: Properties.arguments.defaultValue as! DictionaryValue
         )
     }
     public func value(for property: Properties) -> any EditableVariableValue {
         switch property {
             case .name: return name
+            case .arguments: return arguments
         }
     }
 
     public func set(_ value: Any, for property: Properties) {
         switch property {
             case .name: self.name = value as! ScreenNameValue
+            case .arguments: self.arguments = value as! DictionaryValue
         }
     }
 }
@@ -1038,19 +1044,22 @@ extension ScreenValue {
     enum CodingKeys: String, CodingKey {
         case id
         case name
+        case arguments
     }
 
     public convenience init(from decoder: Decoder) throws {
         let valueContainer = try decoder.container(keyedBy: CodingKeys.self)
         self.init(
             id: (try? valueContainer.decode(UUID.self, forKey: .id)) ?? UUID(),
-            name: (try? valueContainer.decode(ScreenNameValue.self, forKey: .name)) ?? Properties.name.defaultValue as! ScreenNameValue
+            name: (try? valueContainer.decode(ScreenNameValue.self, forKey: .name)) ?? Properties.name.defaultValue as! ScreenNameValue,
+            arguments: (try? valueContainer.decode(DictionaryValue.self, forKey: .arguments)) ?? Properties.arguments.defaultValue as! DictionaryValue
         )
     }
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encode(name, forKey: .name)
+        try container.encode(arguments, forKey: .arguments)
     }
 }
 

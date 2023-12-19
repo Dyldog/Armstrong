@@ -41,12 +41,18 @@ public struct ViewMakerView: View {
                 }
             }
             .environmentObject(viewModel.variables)
-            .navigationTitle(viewModel.name)
+//            .navigationTitle(viewModel.title)
             .if(viewModel.showErrors, modified: { view in
                 view.alert(item: $viewModel.error, content: {
                     .init(title: Text("Error"), message: Text($0.localizedDescription))
                 })
             })
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    TextField("Title", text: $viewModel.title)
+                        .multilineTextAlignment(.center)
+                }
+            }
             .toolbar {
                 HStack {
                     if viewModel.makeMode {

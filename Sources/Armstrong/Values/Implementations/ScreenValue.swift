@@ -14,11 +14,14 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
     public let id: UUID
     
     public static var type: VariableType { .screen }
-    public var name: ScreenNameValue { didSet { objectWillChange.send() } }
     
-    public init(id: UUID, name: ScreenNameValue) {
+    @Published public var name: ScreenNameValue
+    @Published public var arguments: DictionaryValue
+    
+    public init(id: UUID, name: ScreenNameValue, arguments: DictionaryValue) {
         self.id = id
         self.name = name
+        self.arguments = arguments
     }
     
     public func add(_ other: VariableValue) throws -> VariableValue {
@@ -32,19 +35,35 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
         let name: ScreenNameValue = try await name.value(with: variables)
         let screen = name.screen!
         
-        try await screen.initialise(with: variables)
-        return try await screen.content
+        
+        await variables.set(from: try arguments.value(with: variables) as DictionaryValue)
+        try await screen.initialise(with: variables, useInputVarsForInit: true)
+        return try await screen.content.value(with: variables)
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (ScreenValue) -> Void) -> AnyView {
         ExpandableStack(scope: scope, title: "Screen") { [weak self] in
             ProtoText(text: self?.name.protoString ?? "")
         } content: { [weak self] in
-            self?.name.editView(scope: scope, title: "Name", onUpdate: { [weak self] in
-                guard let self else { return }
-                self.name = $0
-                onUpdate(self)
-            })
+            if let self {
+                VStack {
+                    self.name.editView(scope: scope, title: "Name", onUpdate: { [weak self] in
+                        guard let self else { return }
+                        self.name = $0
+                        onUpdate(self)
+                    })
+                    
+                    ForEach(enumerated: self.name.screen.initVariables.elements.map { (key: $0.key, value: $0.value)}) { (index, element) in
+                        (self.arguments.elements[element.key] ?? element.value).editView(scope: scope, title: element.key) { [weak self] in
+                            guard let self else { return }
+                            self.arguments.elements[element.key] = $0
+                            onUpdate(self)
+                        }
+                    }
+                }
+            } else {
+                EmptyView()
+            }
         }
         .any
     }
@@ -57,6 +76,7 @@ extension ScreenValue: MakeableView, Codable {
     public static func defaultValue(for property: Properties) -> any EditableVariableValue {
         switch property {
         case .name: ScreenNameValue.makeDefault()
+        case .arguments: DictionaryValue.makeDefault()
         }
     }
     
