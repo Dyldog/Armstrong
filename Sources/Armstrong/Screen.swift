@@ -47,7 +47,7 @@ public struct Screen: Codable, Identifiable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        initVariables = try container.decode(DictionaryValue.self, forKey: .initVariables)
+        initVariables = (try? container.decode(DictionaryValue.self, forKey: .initVariables)) ?? .makeDefault()
         initActions = try container.decode(StepArray.self, forKey: .initActions)
         content = try container.decode(MakeableStack.self, forKey: .content)
         id = try container.decode(UUID.self, forKey: .id)
