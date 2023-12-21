@@ -20,7 +20,7 @@ public struct MakeableScreenView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @State var content: (stack: MakeableStack, variables: DictionaryValue)?
+    @State var content: MakeableStack?
     
     public init(isRunning: Bool, showEditControls: Bool, scope: Scope, screen: ScreenValue, onContentUpdate: @escaping (ScreenValue) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
@@ -37,7 +37,7 @@ public struct MakeableScreenView: View {
             isRunning: isRunning,
             showEditControls: showEditControls, 
             scope: scope,
-            view: content?.stack ?? MakeableLabel.withText("LOADING!"),
+            view: content ?? MakeableLabel.withText("LOADING!"),
             onContentUpdate: { _ in
                 fatalError()
             },
@@ -47,17 +47,14 @@ public struct MakeableScreenView: View {
         
         .task(id: variables.hashValue) {
             do {
-                if let content {
+                if isRunning {
                     let varsWithArgs = variables.copy()
-                    varsWithArgs.set(from: content.variables)
-                    let stack: MakeableStack = try await content.stack.value(with: varsWithArgs, and: scope)
-                    self.content = (stack, content.variables)
+                    let stack: MakeableStack = try await screen.value(with: variables, and: scope)
+                    let variables: DictionaryValue = try await screen.arguments.value(with: variables, and: scope)
+                    varsWithArgs.set(from: variables)
+                    self.content = try await stack.value(with: varsWithArgs, and: scope)
                 } else {
-                    if isRunning {
-                        let stack: MakeableStack = try await screen.value(with: variables, and: scope)
-                        let variables: DictionaryValue = try await screen.arguments.value(with: variables, and: scope)
-                        content = (stack, variables)
-                    }
+                    self.content = .init([MakeableLabel.withText(screen.protoString)])
                 }
             } catch {
                 print(error)

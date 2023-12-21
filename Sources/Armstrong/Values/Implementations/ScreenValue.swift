@@ -28,8 +28,8 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
         return try name.add(other)
     }
     
-    public var valueString: String { "SCREEN(\(name.valueString)" }
-    public var protoString: String { "SCREEN(\(name.protoString)" }
+    public var valueString: String { "SCREEN(\(name.valueString))" }
+    public var protoString: String { "SCREEN(\(name.protoString))" }
     
     public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         let name: ScreenNameValue = try await name.value(with: variables, and: scope)
@@ -38,7 +38,10 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
         
         await variables.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
         try await screen.initialise(with: variables, and: scope, useInputVarsForInit: true)
-        return try await screen.content.value(with: variables, and: scope)
+        return try await screen.content.value(with: variables, and: scope.withScreens(
+            screens: screen.subscreens.map { $0.name },
+            factory: { name in screen.subscreens.first(where: { $0.name == name }) }
+        ))
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (ScreenValue) -> Void) -> AnyView {
