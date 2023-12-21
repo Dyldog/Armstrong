@@ -15,7 +15,7 @@ public extension StepType {
         
 //    var valueString: String { protoString }
     
-    func value(with variables: Variables) async throws -> VariableValue {
+    func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         self
     }
     

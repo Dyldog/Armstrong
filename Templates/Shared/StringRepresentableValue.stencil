@@ -45,7 +45,7 @@ public final class {{ type.name }}Value: EditableVariableValue, Codable, Copying
     
     public var valueString: String { "\(value)"}
     
-    public func value(with variables: Variables) throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
         self
     }
     

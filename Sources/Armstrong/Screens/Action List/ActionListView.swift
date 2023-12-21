@@ -75,7 +75,7 @@ struct ActionListView: View {
         LongPressButton {
             showAddIndex = index
         } longPressAction: {
-            guard let step = UIPasteboard.general.pasteValue() as? (any StepType) else { return }
+            guard let step = UIPasteboard.general.pasteValue() as? any StepType else { return }
             steps = steps.inserting(step, at: index)
             onUpdate(steps)
         } label: {
@@ -88,11 +88,16 @@ struct ActionListView: View {
 
 import AudioToolbox
 
-extension UIPasteboard {
+public extension UIPasteboard {
     func copy(_ value: any EditableVariableValue) {
-        self.string = try! JSONEncoder().encode(CodableVariableValue(value: value)).string
+        self.string = CodableVariableValue(value: value).encoded().string
         AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
 
+    }
+    
+    func copy(_ screen: Screen) {
+        self.string = screen.encoded().string
+        AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
     }
     
     func pasteValue() -> (any EditableVariableValue)? {
@@ -103,5 +108,15 @@ extension UIPasteboard {
         AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
         
         return value.value
+    }
+    
+    func pasteScreen() -> Screen? {
+        guard let data = self.string?.data(using: .utf8), let value = try? JSONDecoder().decode(Screen.self, from: data) else {
+            return nil
+        }
+        
+        AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
+        
+        return value
     }
 }

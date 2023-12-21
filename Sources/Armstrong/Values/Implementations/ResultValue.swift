@@ -36,12 +36,12 @@ public final class ResultValue: EditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.nil, "add")
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         for step in steps {
-            try await step.run(with: variables)
+            try await step.run(with: variables, and: scope)
         }
         
-        let value: (any VariableValue)? = try await variables.value(for: "$0")?.value(with: variables)
+        let value: (any VariableValue)? = try await variables.value(for: "$0")?.value(with: variables, and: scope)
         return value ?? NilValue()
     }
 }

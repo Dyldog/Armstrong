@@ -1,4 +1,4 @@
-//
+ //
 //  Step.swift
 //  AppApp
 //
@@ -9,5 +9,5 @@ import Foundation
 import SwiftUI
 
 public protocol Step: StepType {
-    func run(with variables: Variables) async throws
+    func run(with variables: Variables, and scope: Scope) async throws
 }

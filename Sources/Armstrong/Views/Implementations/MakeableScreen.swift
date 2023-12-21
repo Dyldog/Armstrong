@@ -11,6 +11,7 @@ import DylKit
 public struct MakeableScreenView: View {
     let isRunning: Bool
     let showEditControls: Bool
+    let scope: Scope
     let screen: ScreenValue
     
     let onContentUpdate: (ScreenValue) -> Void
@@ -21,19 +22,21 @@ public struct MakeableScreenView: View {
     
     @State var content: (stack: MakeableStack, variables: DictionaryValue)?
     
-    public init(isRunning: Bool, showEditControls: Bool, screen: ScreenValue, onContentUpdate: @escaping (ScreenValue) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, screen: ScreenValue, onContentUpdate: @escaping (ScreenValue) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.screen = screen
         self.onContentUpdate = onContentUpdate
         self.onRuntimeUpdate = onRuntimeUpdate
         self._error = error
+        self.scope = scope
     }
     
     public var body: some View {
         MakeableWrapperView(
             isRunning: isRunning,
-            showEditControls: showEditControls,
+            showEditControls: showEditControls, 
+            scope: scope,
             view: content?.stack ?? MakeableLabel.withText("LOADING!"),
             onContentUpdate: { _ in
                 fatalError()
@@ -47,12 +50,12 @@ public struct MakeableScreenView: View {
                 if let content {
                     let varsWithArgs = variables.copy()
                     varsWithArgs.set(from: content.variables)
-                    let stack: MakeableStack = try await content.stack.value(with: varsWithArgs)
+                    let stack: MakeableStack = try await content.stack.value(with: varsWithArgs, and: scope)
                     self.content = (stack, content.variables)
                 } else {
                     if isRunning {
-                        let stack: MakeableStack = try await screen.value(with: variables)
-                        let variables: DictionaryValue = try await screen.arguments.value(with: variables)
+                        let stack: MakeableStack = try await screen.value(with: variables, and: scope)
+                        let variables: DictionaryValue = try await screen.arguments.value(with: variables, and: scope)
                         content = (stack, variables)
                     }
                 }

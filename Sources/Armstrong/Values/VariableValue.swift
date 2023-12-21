@@ -14,12 +14,12 @@ public protocol VariableValue: Codable, Copying, CodeRepresentable {
     func add(_ other: VariableValue) throws -> VariableValue
     var protoString: String { get }
     var valueString: String { get }
-    func value(with variables: Variables) async throws -> VariableValue
+    func value(with variables: Variables, and scope: Scope) async throws -> VariableValue
 }
 
 public extension VariableValue {
-    func value<T>(with variables: Variables, of type: T.Type = T.self) async throws -> T {
-        let value: VariableValue = try await value(with: variables)
+    func value<T>(with variables: Variables, and scope: Scope, of type: T.Type = T.self) async throws -> T {
+        let value: VariableValue = try await value(with: variables, and: scope)
         guard let castValue = value as? T else {
              throw VariableValueError.wrongTypeForOperation
         }

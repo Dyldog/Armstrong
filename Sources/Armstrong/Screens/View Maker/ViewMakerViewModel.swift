@@ -26,6 +26,8 @@ public class ViewMakerViewModel: ObservableObject {
     private let onUpdate: ((Screen) -> Void)?
     var showEdit: Bool { onUpdate != nil }
     
+    private(set) var scope: Scope!
+    
     @Published var showErrors: Bool = false
 //    var error: VariableValueError?
     
@@ -64,13 +66,19 @@ public class ViewMakerViewModel: ObservableObject {
         }
     }
     
-    public init(screen: Screen, makeMode: Bool, onUpdate: ((Screen) -> Void)?) {
+    public init(scope: Scope?, screen: Screen, makeMode: Bool, onUpdate: ((Screen) -> Void)?) {
         self.screen = screen
         self.title = screen.name
         self.content = screen.content
         self.onUpdate = onUpdate
         self._variables = .init()
         self.makeMode = makeMode
+        
+        self.scope = scope ?? .init()
+        
+        self.scope = self.scope.withScreens(screens: screen.subscreens.map { $0.name }) { screen in
+            self.screen.subscreens.first(where: { $0.name == screen })
+        }
         
         print(screen.codeRepresentation)
         
@@ -117,14 +125,14 @@ public class ViewMakerViewModel: ObservableObject {
     
     func makeVariables() async throws -> Variables {
         let newVars = Variables()
-        try await screen.initialise(with: newVars)
+        try await screen.initialise(with: newVars, and: scope)
         hasFinishedFirstLoad = true
         return newVars
     }
     
     func onRuntimeUpdate(completion: @escaping Block) {
         Task { @MainActor in
-            try await screen.updateVariablesFromContent(vars: variables)
+            try await screen.updateVariablesFromContent(vars: variables, and: scope)
             completion()
 //            self.updater += 1
         }
@@ -141,6 +149,14 @@ public class ViewMakerViewModel: ObservableObject {
     func updateInitVariables(_ newValue: DictionaryValue) {
         Task { @MainActor in
             screen.initVariables = newValue
+            try await makeNewVariables()
+            onUpdate?(screen)
+        }
+    }
+    
+    func updateSubscreens(_ newValue: [Screen]) {
+        Task { @MainActor in
+            screen.subscreens = newValue
             try await makeNewVariables()
             onUpdate?(screen)
         }

@@ -36,7 +36,7 @@ public final class StepArray: Codable, EditableVariableValue {
     
     public var valueString: String { value.map { $0.protoString }.joined(separator: ",\n") }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         self
 //        try await run(with: variables)
 //        return await variables.value(for: "$0") ?? NilValue()
@@ -67,9 +67,9 @@ public final class StepArray: Codable, EditableVariableValue {
         try container.encode(CodableStepList(steps: value))
     }
     
-    public func run(with variables: Variables) async throws {
+    public func run(with variables: Variables, and scope: Scope) async throws {
         for step in value {
-            try await step.run(with: variables)
+            try await step.run(with: variables, and: scope)
         }
     }
 }

@@ -24,7 +24,8 @@ public struct ViewMakerView: View {
                         if viewModel.hasFinishedFirstLoad {
                             MakeableStackView(
                                 isRunning: !viewModel.makeMode,
-                                showEditControls: viewModel.makeMode,
+                                showEditControls: viewModel.makeMode, 
+                                scope: viewModel.scope,
                                 stack: viewModel.content,
                                 onContentUpdate: { content in
                                     viewModel.content = content
@@ -59,22 +60,20 @@ public struct ViewMakerView: View {
                         SheetButton(title: { Text("Init Actions") }) {
                             NavigationView {
                                 ScrollView {
-                                    viewModel.screen.initVariables.editView(
-                                        scope: .init(),
-                                        title: "Init Variables"
-                                    ) {
-                                        viewModel.updateInitVariables($0)
-                                    }
-                                    .padding()
-                                    
-                                    ActionListView(
-                                        scope: .init(),
-                                        title: "Init Actions",
-                                        steps: viewModel.screen.initActions.value
-                                    ) {
-                                        viewModel.updateInitActions(.init(value: $0))
-                                    }
-                                    .padding()
+                                    ViewInitValuesView(
+                                        scope: viewModel.scope,
+                                        initVariables: viewModel.screen.initVariables,
+                                        initVariablesUpdate: {
+                                            viewModel.updateInitVariables($0)
+                                        },
+                                        initActions: viewModel.screen.initActions,
+                                        initActionsUpdate: {
+                                            viewModel.updateInitActions($0)
+                                        },
+                                        subscreens: viewModel.screen.subscreens,
+                                        subscreensUpdate: {
+                                            viewModel.updateSubscreens($0)
+                                        })
                                 }
                                 .background(.gray.opacity(0.1))
                                 .navigationTitle("Init Actions")

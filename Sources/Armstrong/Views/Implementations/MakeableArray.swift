@@ -36,7 +36,7 @@ import SwiftUI
 //        fatalError()
 //    }
 //    
-//    public func value(with variables: Variables) async throws -> VariableValue {
+//    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
 //        var newViews: [any MakeableView] = []
 //        
 //        for view in value {

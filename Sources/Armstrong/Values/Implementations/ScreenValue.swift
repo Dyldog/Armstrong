@@ -31,14 +31,14 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
     public var valueString: String { "SCREEN(\(name.valueString)" }
     public var protoString: String { "SCREEN(\(name.protoString)" }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
-        let name: ScreenNameValue = try await name.value(with: variables)
-        let screen = name.screen!
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
+        let name: ScreenNameValue = try await name.value(with: variables, and: scope)
+        guard let screen = name.screen(from: scope) else { throw VariableValueError.screenDoesNotExist(name.protoString) }
         
         
-        await variables.set(from: try arguments.value(with: variables) as DictionaryValue)
-        try await screen.initialise(with: variables, useInputVarsForInit: true)
-        return try await screen.content.value(with: variables)
+        await variables.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
+        try await screen.initialise(with: variables, and: scope, useInputVarsForInit: true)
+        return try await screen.content.value(with: variables, and: scope)
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (ScreenValue) -> Void) -> AnyView {
@@ -53,10 +53,10 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
                         onUpdate(self)
                     })
                     
-                    ForEach(enumerated: self.name.screen.initVariables.elements.map { (key: $0.key, value: $0.value)}) { (index, element) in
-                        (self.arguments.elements[element.key] ?? element.value).editView(scope: scope, title: element.key) { [weak self] in
+                    ForEach(enumerated: (self.name.screen(from: scope)?.initVariables.elements ?? [:]).map { (key: $0.key, value: $0.value)}) { (index, element) in
+                        (self.arguments.elements[element.key] ?? element.value).value.editView(scope: scope, title: element.key) { [weak self] in
                             guard let self else { return }
-                            self.arguments.elements[element.key] = $0
+                            self.arguments.elements[element.key] = $0.any
                             onUpdate(self)
                         }
                     }
@@ -80,7 +80,7 @@ extension ScreenValue: MakeableView, Codable {
         }
     }
     
-    public func insertValues(into variables: Variables) async throws {
+    public func insertValues(into variables: Variables, with scope: Scope) async throws {
 //        let view: any MakeableView = try await value(with: variables)
 //        try await view.insertValues(into: variables)
     }

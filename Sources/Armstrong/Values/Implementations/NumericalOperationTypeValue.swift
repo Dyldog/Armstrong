@@ -70,7 +70,7 @@ public final class NumericalOperationTypeValue: PrimitiveEditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.numericalOperationType, "add")
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         self
     }
     

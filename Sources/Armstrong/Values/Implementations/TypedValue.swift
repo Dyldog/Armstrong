@@ -75,8 +75,8 @@ public enum TypedValueOption<T: TypeableValue>: Codable {
         }
     }
     
-    public func value(with variables: Variables) async throws -> T {
-        return try await value.value(with: variables)
+    public func value(with variables: Variables, and scope: Scope) async throws -> T {
+        return try await value.value(with: variables, and: scope)
     }
     
     public var type: TypedValueOptionType {
@@ -128,8 +128,8 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable,
     public var protoString: String { "\(value.title): \(value.value.protoString)" }
     public var valueString: String { "\(value.title): \(value.value.valueString)" }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
-        try await value.value.value(with: variables)
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
+        try await value.value.value(with: variables, and: scope)
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (TypedValue<T>) -> Void) -> AnyView {

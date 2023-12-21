@@ -23,9 +23,9 @@ public final class SetVarStep: Step {
     public var protoString: String { "{ $\(varName.protoString) = \(value.protoString) }" }
     public var valueString: String { "{ $\(varName.valueString) = \(value.valueString) }" }
     
-    public func run(with variables: Variables) async throws {
-        let varValue = try await varName.value.value(with: variables)
-        let valueValue = try await value.value(with: variables)
+    public func run(with variables: Variables, and scope: Scope) async throws {
+        let varValue = try await varName.value.value(with: variables, and: scope)
+        let valueValue = try await value.value(with: variables, and: scope)
 
         await variables.set(valueValue, for: varValue.valueString)
     }

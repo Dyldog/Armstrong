@@ -11,6 +11,7 @@ import DylKit
 public struct MakeableLabelView: View {
     let isRunning: Bool
     let showEditControls: Bool
+    let scope: Scope
     let label: MakeableLabel
     
     let onContentUpdate: (MakeableLabel) -> Void
@@ -28,19 +29,20 @@ public struct MakeableLabelView: View {
     @State var isMultiline: Bool = false
     
     
-    public init(isRunning: Bool, showEditControls: Bool, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.label = label
         self.onContentUpdate = onContentUpdate
         self.onRuntimeUpdate = onRuntimeUpdate
         self._error = error
+        self.scope = scope
     }
     
     func labelText() async -> String {
         do {
             if isRunning {
-                let value = try await label.text.value(with: variables).valueString
+                let value = try await label.text.value(with: variables, and: scope).valueString
                 return value
             } else {
                 return label.protoString
@@ -56,12 +58,12 @@ public struct MakeableLabelView: View {
     private func updateValues() async  {
         do {
             self.text = await labelText()
-            self.fontSize = (try await label.fontSize.value(with: variables) as IntValue).value
-            self.fontWeight = (try await label.fontWeight.value(with: variables) as FontWeightValue).value
-            self.italic = (try await label.italic.value(with: variables) as BoolValue).value
-            self.base = (try await label.base.value(with: variables) as MakeableBase)
-            self.textColor = (try await label.textColor.value(with: variables) as ColorValue).value
-            self.isMultiline = (try await label.isMultiline.value(with: variables) as BoolValue).value
+            self.fontSize = (try await label.fontSize.value(with: variables, and: scope) as IntValue).value
+            self.fontWeight = (try await label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value
+            self.italic = (try await label.italic.value(with: variables, and: scope) as BoolValue).value
+            self.base = (try await label.base.value(with: variables, and: scope) as MakeableBase)
+            self.textColor = (try await label.textColor.value(with: variables, and: scope) as ColorValue).value
+            self.isMultiline = (try await label.isMultiline.value(with: variables, and: scope) as BoolValue).value
         } catch {
             fatalError(error.localizedDescription)
         }
@@ -121,7 +123,7 @@ public final class MakeableLabel: MakeableView {
         )
     }
     
-    public func insertValues(into variables: Variables) throws { }
+    public func insertValues(into variables: Variables, with scope: Scope) throws { }
     
     public var protoString: String { "LABEL(\(text.protoString))" }
     
@@ -129,16 +131,16 @@ public final class MakeableLabel: MakeableView {
     
     public var valueString: String { text.valueString }
 
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         await MakeableLabel(
             id: id,
-            text: (try text.value(with: variables) as (any EditableVariableValue)).any,
-            fontSize: try fontSize.value(with: variables),
-            fontWeight: try fontWeight.value(with: variables),
-            italic: try italic.value(with: variables),
-            base: try base.value(with: variables),
-            textColor: try textColor.value(with: variables),
-            isMultiline: try isMultiline.value(with: variables)
+            text: (try text.value(with: variables, and: scope) as (any EditableVariableValue)).any,
+            fontSize: try fontSize.value(with: variables, and: scope),
+            fontWeight: try fontWeight.value(with: variables, and: scope),
+            italic: try italic.value(with: variables, and: scope),
+            base: try base.value(with: variables, and: scope),
+            textColor: try textColor.value(with: variables, and: scope),
+            isMultiline: try isMultiline.value(with: variables, and: scope)
         )
 //        self
     }

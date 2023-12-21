@@ -13,15 +13,13 @@ public final class ScreenNameValue: EditableVariableValue, ObservableObject {
     
     public static var type: VariableType { .screenName }
     public var value: String { didSet { objectWillChange.send() } }
-    var screen: Screen! { Self.screen(for: value) }
     
     public init(value: String) {
-//        guard Self.screen(for: value) != nil else { return nil }
         self.value = value
     }
     
-    private static func screen(for name: String) -> Screen? {
-        AALibrary.shared.allScreens.first(where: { $0.name == name })
+    func screen(from scope: Scope) -> Screen? {
+        scope.screen(named: value)
     }
     
     public static func makeDefault() -> ScreenNameValue {
@@ -35,7 +33,7 @@ public final class ScreenNameValue: EditableVariableValue, ObservableObject {
     public var protoString: String { value }
     public var valueString: String { value }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         self
     }
     
@@ -53,8 +51,8 @@ public final class ScreenNameValue: EditableVariableValue, ObservableObject {
                 self.value = $0
                 onUpdate(self)
             })) {
-                ForEach(AALibrary.shared.allScreens) {
-                    Text($0.name).tag($0.name)
+                ForEach(scope.screenNames) {
+                    Text($0).tag($0)
                 }
             } label: {
                 Text(title).bold().scope(scope)

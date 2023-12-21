@@ -25,7 +25,7 @@ public final class VariableTypeValue: PrimitiveEditableVariableValue {
         .init(value: .string)
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         self
     }
     

@@ -9,6 +9,6 @@ import SwiftUI
 import DylKit
 
 public protocol MakeableView: CompositeEditableVariableValue, Codable, CodeRepresentable, ObservableObject, Identifiable where ID == UUID {
-    func insertValues(into variables: Variables) async throws
-    func make(isRunning: Bool, showEditControls: Bool, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView
+    func insertValues(into variables: Variables, with scope: Scope) async throws
+    func make(isRunning: Bool, showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView
 }

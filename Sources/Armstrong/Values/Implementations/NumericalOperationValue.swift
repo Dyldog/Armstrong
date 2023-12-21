@@ -36,10 +36,10 @@ public final class NumericalOperationValue: CompositeEditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.numericalOperation, "add")
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         guard
-            let lhs = try await lhs.value(with: variables.copy()) as? any NumericValue,
-            let rhs = try await rhs.value(with: variables.copy()) as? any NumericValue
+            let lhs = try await lhs.value(with: variables.copy(), and: scope) as? any NumericValue,
+            let rhs = try await rhs.value(with: variables.copy(), and: scope) as? any NumericValue
         else { throw VariableValueError.wrongTypeForOperation }
         
         return try lhs.perform(operation: operation.value, with: rhs)

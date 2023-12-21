@@ -28,7 +28,7 @@ public final class StringValue: EditableVariableValue {
     
     public var protoString: String { value }
     public var valueString: String { value }
-    public func value(with variables: Variables) throws -> VariableValue { self }
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue { self }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (StringValue) -> Void) -> AnyView {
         HStack {

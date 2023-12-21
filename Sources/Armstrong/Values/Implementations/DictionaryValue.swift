@@ -37,10 +37,10 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         )
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         var mapped: [String: AnyValue] = [:]
         for (key, value) in elements {
-            mapped[key] = AnyValue(value: try await value.value(with: variables))
+            mapped[key] = AnyValue(value: try await value.value(with: variables, and: scope))
         }
         
         return DictionaryValue(

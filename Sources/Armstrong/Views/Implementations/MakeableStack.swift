@@ -9,6 +9,7 @@ import SwiftUI
 import DylKit
 
 public struct MakeableStackView: View {
+    let scope: Scope
     let isRunning: Bool
     let showEditControls: Bool
     let stack: MakeableStack
@@ -29,7 +30,7 @@ public struct MakeableStackView: View {
 //            .map { (offset, element) in .init(element, hash: { $0.encoded().string }) }
 //    }
     
-    public init(isRunning: Bool, showEditControls: Bool, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
+    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
         self.stack = stack
@@ -38,6 +39,7 @@ public struct MakeableStackView: View {
         self.showAddIndex = showAddIndex
         self.showEditIndex = showEditIndex
         self._error = error
+        self.scope = scope
     }
     
     public var body: some View {
@@ -51,7 +53,7 @@ public struct MakeableStackView: View {
             } else {
                 ForEach(Array(elements.elements.enumerated())) { (index, element) in
                     HStack {
-                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, view: element as! (any MakeableView), onContentUpdate: {
+                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, scope: scope, view: element as! (any MakeableView), onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
                         }, onRuntimeUpdate: onRuntimeUpdate, error: $error)
                         .editable(showEditControls, onEdit: {
@@ -80,7 +82,7 @@ public struct MakeableStackView: View {
                     self.elements.elements = elements.elements
                 default:
                     if isRunning {
-                        let elements = try await stack.content.value(with: variables) as ArrayValue
+                        let elements = try await stack.content.value(with: variables, and: scope) as ArrayValue
                         self.elements.type = elements.type
                         self.elements.elements = elements.elements
                     } else {
@@ -114,7 +116,7 @@ public struct MakeableStackView: View {
         }).sheet(item: $showEditIndex, content: { index in
             let elements = stack.content.value.constant!
             NavigationView {
-                EditViewView(title: "Elements", scope: .init(), viewModel: .init(editable: elements.elements[index] as! (any MakeableView)) {
+                EditViewView(title: "Elements", scope: scope, viewModel: .init(editable: elements.elements[index] as! (any MakeableView)) {
                     onUpdate(at: index , with: $0)
                 })
             }
@@ -180,12 +182,12 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         self.init(id: id, base: base, axis: axis, content: .value(elements))
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         MakeableStack(
             id: id,
-            base: try await base.value(with: variables),
-            axis: try await axis.value(with: variables),
-            content: .value(try await content.value(with: variables))
+            base: try await base.value(with: variables, and: scope),
+            axis: try await axis.value(with: variables, and: scope),
+            content: .value(try await content.value(with: variables, and: scope))
         )
     }
     
@@ -202,10 +204,10 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         }
     }
     
-    public func insertValues(into variables: Variables) async throws {
-        for element in try content.value.constant?.elements ?? [] {
+    public func insertValues(into variables: Variables, with scope: Scope) async throws {
+        for element in content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
-            try await element.insertValues(into: variables)
+            try await element.insertValues(into: variables, with: scope)
         }
     }
 }

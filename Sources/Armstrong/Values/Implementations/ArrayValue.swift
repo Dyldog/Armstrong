@@ -38,10 +38,10 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
         return "[\(elements.map { $0.valueString }.joined(separator: ", "))]"
     }
     
-    public func value(with variables: Variables) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
         var mapped: [any EditableVariableValue] = []
         for element in elements {
-            mapped.append(try await element.value(with: variables))
+            mapped.append(try await element.value(with: variables, and: scope))
         }
         return ArrayValue(
             type: type,
