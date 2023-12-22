@@ -127,14 +127,14 @@ extension StepArray: CodeRepresentable {
 }
 
 extension View {
-    func onFirstAppear(_ key: String, message: String) -> some View {
+    func onFirstAppear(_ key: String, message: String, in defaults: UserDefaults = .standard) -> some View {
         let key = "\(key)_SHOWN"
         return self
             .popover(isPresented: .init(get: {
-                !UserDefaults.standard.bool(forKey: key)
+                !defaults.bool(forKey: key)
             }, set: {
                 if $0 == true {
-                    UserDefaults.standard.set(true, forKey: key)
+                    defaults.set(true, forKey: key)
                 }
             }), content: {
                 Text(message).font(.footnote)

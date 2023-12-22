@@ -11,7 +11,7 @@ import SwiftUI
 
 public struct Screen: Codable, Identifiable {
     
-    @UserDefaultable(key: "SCREENS") public static var screens: [Screen] = []
+    @UserDefaultable(key: "SCREENS", store: UserDefaults.appApp) public static var screens: [Screen] = []
     
     enum CodingKeys: String, CodingKey {
         case initVariables
