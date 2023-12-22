@@ -185,3 +185,7 @@ extension TypedValue: CodeRepresentable {
         value.value.codeRepresentation
     }
 }
+
+public extension EditableVariableValue {
+    var typed: TypedValue<Self> { .value(self) }
+}
