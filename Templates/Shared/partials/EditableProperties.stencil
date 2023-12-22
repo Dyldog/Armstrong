@@ -1,7 +1,8 @@
 
 {% macro EditableProperties type %}
 extension {{ type.name }} {
-     public enum Properties: String, ViewProperty {
+    {% if type.storedVariables.count > 0 %}
+     public enum Properties: String, ViewProperty, CaseIterable {
         {% for property in type.storedVariables %}
             {% if not property.defaultValue %}
             {% if property.name != "id" %}
@@ -22,6 +23,12 @@ extension {{ type.name }} {
             }
         }
     }
+    {% else %}
+    public enum Properties: ViewProperty, CaseIterable {
+        public var defaultValue: any EditableVariableValue { fatalError() }
+        public var rawValue: String { fatalError() }
+    }
+    {% endif %}
      
     public static func make(factory: (Properties) -> any EditableVariableValue) -> Self {
         .init(

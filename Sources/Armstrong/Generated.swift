@@ -497,7 +497,7 @@ extension MakeableBase: Copying {
 }
 
 extension MakeableBase {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case padding
         case backgroundColor
         case cornerRadius
@@ -586,7 +586,7 @@ extension MakeableLabel: Copying {
 }
 
 extension MakeableLabel {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case text
         case fontSize
         case fontWeight
@@ -712,7 +712,7 @@ extension MakeableStack: Copying {
 }
 
 extension MakeableStack {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case base
         case axis
         case content
@@ -848,7 +848,7 @@ extension NumericalOperationValue: Copying {
 }
 
 extension NumericalOperationValue {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case lhs
         case rhs
         case operation
@@ -996,7 +996,7 @@ extension ScreenValue: Copying {
 }
 
 extension ScreenValue {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case name
         case arguments
         public var defaultValue: any EditableVariableValue {
@@ -1075,7 +1075,7 @@ extension SetVarStep: Copying {
 }
 
 extension SetVarStep {
-     public enum Properties: String, ViewProperty {
+     public enum Properties: String, ViewProperty, CaseIterable {
         case varName
         case value
         public var defaultValue: any EditableVariableValue {

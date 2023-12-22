@@ -4,6 +4,8 @@ extension {{ type.name }} {
     enum CodingKeys: String, CodingKey {
     {% for var in type.storedVariables where not var.defaultValue %}
         case {{ var.name }}
+    {% empty %}
+        case dummyKey
     {% endfor %}
     }
 

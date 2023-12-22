@@ -7,6 +7,8 @@
 
 import Foundation
 
-public protocol ViewProperty: RawRepresentable, CaseIterable, Hashable where RawValue == String {
+public protocol ViewProperty: Hashable {
+    static var allCases: [Self] { get }
+    var rawValue: String { get }
     var defaultValue: any EditableVariableValue { get }
 }
