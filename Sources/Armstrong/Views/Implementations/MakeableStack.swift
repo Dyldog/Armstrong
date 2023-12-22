@@ -101,29 +101,6 @@ public struct MakeableStackView: View {
                 }
             }
         }
-//        .task(id: variables.hashValue) {
-//            do {
-//                switch stack.content.value {
-//                case let .constant(array):
-//                    let elements = array
-//                    self.elements.type = elements.type
-//                    self.elements.elements = elements.elements
-//                default:
-//                    if isRunning {
-//                        let elements = try stack.content.value(with: variables, and: scope) as ArrayValue
-//                        self.elements.type = elements.type
-//                        self.elements.elements = elements.elements
-//                    } else {
-//                        self.elements.type = .label
-//                        self.elements.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
-//                    }
-//                }
-//            } catch let error as VariableValueError {
-//                self.error = error
-//            } catch {
-//                print(error)
-//            }
-//        }
         .base(stack.base)
         .if(showEditControls) {
             $0.padding(4).overlay(

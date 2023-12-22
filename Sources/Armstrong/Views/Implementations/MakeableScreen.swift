@@ -20,7 +20,7 @@ public struct MakeableScreenView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @State var content: MakeableStack?
+//    @State var content: MakeableStack?
     
     public init(isRunning: Bool, showEditControls: Bool, scope: Scope, screen: ScreenValue, onContentUpdate: @escaping (ScreenValue) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
@@ -32,33 +32,35 @@ public struct MakeableScreenView: View {
         self.scope = scope
     }
     
+    private var content: MakeableStack {
+        do {
+            if isRunning {
+                let variables = variables.copy()
+                let varsWithArgs = variables.copy()
+                let stack: MakeableStack = try screen.value(with: variables, and: scope)
+                let variableDict: DictionaryValue = try screen.arguments.value(with: variables, and: scope)
+                varsWithArgs.set(from: variableDict)
+                return try stack.value(with: varsWithArgs, and: scope)
+            } else {
+                return .init([MakeableLabel.withText(screen.protoString)])
+            }
+        } catch {
+            print(error)
+            return .init([MakeableLabel.withText("LOADING!")])
+        }
+    }
+    
     public var body: some View {
         MakeableWrapperView(
             isRunning: isRunning,
             showEditControls: showEditControls, 
             scope: scope,
-            view: content ?? MakeableLabel.withText("LOADING!"),
+            view: content,
             onContentUpdate: { _ in
                 fatalError()
             },
             onRuntimeUpdate: onRuntimeUpdate,
             error: $error
         )
-        
-//        .task(id: variables.hashValue) {
-//            do {
-//                if isRunning {
-//                    let varsWithArgs = variables.copy()
-//                    let stack: MakeableStack = try screen.value(with: variables, and: scope)
-//                    let variables: DictionaryValue = try screen.arguments.value(with: variables, and: scope)
-//                    varsWithArgs.set(from: variables)
-//                    self.content = try stack.value(with: varsWithArgs, and: scope)
-//                } else {
-//                    self.content = .init([MakeableLabel.withText(screen.protoString)])
-//                }
-//            } catch {
-//                print(error)
-//            }
-//        }
     }
 }

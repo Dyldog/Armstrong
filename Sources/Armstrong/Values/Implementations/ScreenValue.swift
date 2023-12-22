@@ -57,9 +57,9 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
                     })
                     
                     ForEach(enumerated: (self.name.screen(from: scope)?.initVariables.elements ?? [:]).map { (key: $0.key, value: $0.value)}) { (index, element) in
-                        (self.arguments.elements[element.key] ?? element.value).value.editView(scope: scope, title: element.key) { [weak self] in
+                        (self.arguments.elements[element.key] ?? element.value).editView(scope: scope, title: element.key) { [weak self] in
                             guard let self else { return }
-                            self.arguments.elements[element.key] = $0.any
+                            self.arguments.elements[element.key] = $0
                             onUpdate(self)
                         }
                     }

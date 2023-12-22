@@ -48,7 +48,10 @@ public class ViewMakerViewModel: ObservableObject {
     @Published private(set) var updater: Int = 0
     
     @Published private(set) var _variables: Variables
-    @Published var error: VariableValueError?
+    var error: VariableValueError? {
+        willSet { if showErrors { objectWillChange.send() } }
+        didSet { print("ERROR: \(error?.localizedDescription)") }
+    }
     
     private var cancellables: Set<AnyCancellable> = .init()
     
@@ -76,9 +79,7 @@ public class ViewMakerViewModel: ObservableObject {
         self.scope = self.scope.withScreens(screens: screen.subscreens.map { $0.name }) { screen in
             self.screen.subscreens.first(where: { $0.name == screen })
         }
-        
-        print(screen.codeRepresentation)
-        
+                
         do {
             try self.makeNewVariables()
         } catch {
@@ -100,10 +101,6 @@ public class ViewMakerViewModel: ObservableObject {
             
         }
         .store(in: &cancellables)
-        
-        $error.sink { error in
-            print("ERROR: \(error?.localizedDescription)")
-        }.store(in: &cancellables)
         
 //        $content.dropFirst().sink { content in
 //            onUpdate(.init(name: self.name, initActions: self.initActions, content: content))
