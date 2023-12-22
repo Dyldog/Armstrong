@@ -9,40 +9,45 @@ import SwiftUI
 import DylKit
 
 public struct ViewMakerView: View {
+    let isWidget: Bool
     @StateObject var viewModel: ViewMakerViewModel
     
-    public init(viewModel: ViewMakerViewModel) {
+    public init(isWidget: Bool = false, viewModel: ViewMakerViewModel) {
+        self.isWidget = isWidget
         self._viewModel = .init(wrappedValue: viewModel)
     }
     
+    private var content: some View {
+        CenterStack {
+            return MakeableStackView(
+                isRunning: !viewModel.makeMode,
+                showEditControls: viewModel.makeMode,
+                scope: viewModel.scope,
+                stack: viewModel.content,
+                onContentUpdate: { content in
+                    viewModel.content = content
+                }, onRuntimeUpdate: {
+                    viewModel.onRuntimeUpdate(completion: $0)
+                },
+                error: $viewModel.error
+            ).any
+        }
+        .environmentObject(viewModel.variables)
+    }
+    
     public var body: some View {
-        Self._printChanges()
-        return GeometryReader { geometry in
-            VStack {
-                ScrollView {
-                    CenterStack {
-                        if viewModel.hasFinishedFirstLoad {
-                            MakeableStackView(
-                                isRunning: !viewModel.makeMode,
-                                showEditControls: viewModel.makeMode, 
-                                scope: viewModel.scope,
-                                stack: viewModel.content,
-                                onContentUpdate: { content in
-                                    viewModel.content = content
-                                }, onRuntimeUpdate: {
-                                    viewModel.onRuntimeUpdate(completion: $0)
-                                },
-                                error: $viewModel.error
-                            ).any
-                        } else {
-                            ProgressView().progressViewStyle(.circular).any
-                        }
+        if isWidget {
+            content
+        } else {
+            GeometryReader { geometry in
+                VStack {
+                    ScrollView {
+                        content
+                            .frame(minHeight: geometry.size.height)
                     }
-                    .frame(minHeight: geometry.size.height)
                 }
             }
-            .environmentObject(viewModel.variables)
-//            .navigationTitle(viewModel.title)
+            //            .navigationTitle(viewModel.title)
             .if(viewModel.showErrors, modified: { view in
                 view.alert(item: $viewModel.error, content: {
                     .init(title: Text("Error"), message: Text($0.localizedDescription))

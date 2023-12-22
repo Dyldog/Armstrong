@@ -8,12 +8,12 @@
 import SwiftUI
 
 extension StepType {
-    public func run(with variables: Variables, and scope: Scope) async throws {
+    public func run(with variables: Variables, and scope: Scope) throws {
         switch self {
         case let step as any ValueStep:
-            try await variables.set(step.run(with: variables, and: scope), for: "$0")
+            try variables.set(step.run(with: variables, and: scope), for: "$0")
         case let step as any Step:
-            try await step.run(with: variables, and: scope)
+            try step.run(with: variables, and: scope)
         default:
             fatalError()
         }

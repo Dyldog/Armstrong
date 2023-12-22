@@ -33,8 +33,8 @@ public final class AnyValue: EditableVariableValue, ObservableObject {
     public var protoString: String { value.protoString }
     public var valueString: String { value.valueString }
     
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
-        try await value.value(with: variables, and: scope)
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+        try value.value(with: variables, and: scope)
     }
     
     public func editView(scope: Scope, title: String, onUpdate: @escaping (AnyValue) -> Void) -> AnyView {

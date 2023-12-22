@@ -61,35 +61,35 @@ public struct Screen: Codable, Identifiable {
 }
 
 extension Screen {
-    func initialise(with vars: Variables, and scope: Scope, useInputVarsForInit: Bool = false) async throws {
+    func initialise(with vars: Variables, and scope: Scope, useInputVarsForInit: Bool = false) throws {
         
         if !useInputVarsForInit {
-            try await setInitVars(in: vars)
+            try setInitVars(in: vars)
         }
-        try await runInitActions(with: vars, and: scope)
-//        await vars.removeReturnVariable()
-        try await updateVariablesFromContent(vars: vars, and: scope)
-//        await vars.removeReturnVariable()
+        try runInitActions(with: vars, and: scope)
+//         vars.removeReturnVariable()
+        try updateVariablesFromContent(vars: vars, and: scope)
+//         vars.removeReturnVariable()
     }
     
-    func setInitVars(in vars: Variables) async throws {
-        await vars.set(from: initVariables)
+    func setInitVars(in vars: Variables) throws {
+         vars.set(from: initVariables)
     }
     
-    func runInitActions(with vars: Variables, and scope: Scope) async throws {
+    func runInitActions(with vars: Variables, and scope: Scope) throws {
         for action in initActions {
             do {
-                try await action.run(with: vars, and: scope)
+                try action.run(with: vars, and: scope)
             } catch {
                 print(error)
             }
         }
     }
     
-    func updateVariablesFromContent(vars: Variables, and scope: Scope) async throws {
+    func updateVariablesFromContent(vars: Variables, and scope: Scope) throws {
         for element in content.content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
-            try? await element.insertValues(into: vars, with: scope)
+            try?  element.insertValues(into: vars, with: scope)
         }
     }
 }

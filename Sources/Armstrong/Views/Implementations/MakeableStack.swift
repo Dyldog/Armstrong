@@ -22,7 +22,7 @@ public struct MakeableStackView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @StateObject var elements: ArrayValue = .init(type: .string, elements: [])
+//    @StateObject var elements: ArrayValue = .init(type: .string, elements: [])
 //    var views: [HashableBox<any MakeableView>] {
 //        elements.elements
 //            .compactMap { $0 as? any MakeableView }
@@ -42,16 +42,44 @@ public struct MakeableStackView: View {
         self.scope = scope
     }
     
+    private var content: ArrayValue {
+        let variables = variables.copy()
+        let elements: ArrayValue
+        
+        do {
+            switch stack.content.value {
+            case let .constant(array):
+                elements = array
+            default:
+                if isRunning {
+                    elements = try stack.content.value(with: variables, and: scope) as ArrayValue
+                } else {
+                    elements = .init(type: .label, elements: [MakeableLabel.withText(stack.content.protoString, multiline: true)])
+                }
+            }
+        } catch let error as VariableValueError {
+            self.error = error
+            elements = .init(type: .label, elements: [MakeableLabel.withText("ERROR")])
+        } catch {
+            print(error)
+            elements = .init(type: .label, elements: [MakeableLabel.withText("ERROR")])
+        }
+        
+        return elements
+    }
+    
     public var body: some View {
         Stack(axis: stack.axis.value) {
             if showEditControls {
                 makeButton(at: 0)
             }
             
-            if elements.elements.isEmpty == true, !showEditControls {
+            let elements = content.elements
+            
+            if elements.isEmpty == true, !showEditControls {
                 Text("STACKs")
             } else {
-                ForEach(Array(elements.elements.enumerated())) { (index, element) in
+                ForEach(enumerated: elements) { (index, element) in
                     HStack {
                         MakeableWrapperView(isRunning: isRunning, showEditControls: false, scope: scope, view: element as! (any MakeableView), onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
@@ -73,29 +101,29 @@ public struct MakeableStackView: View {
                 }
             }
         }
-        .task(id: variables.hashValue) {
-            do {
-                switch stack.content.value {
-                case let .constant(array):
-                    let elements = array
-                    self.elements.type = elements.type
-                    self.elements.elements = elements.elements
-                default:
-                    if isRunning {
-                        let elements = try await stack.content.value(with: variables, and: scope) as ArrayValue
-                        self.elements.type = elements.type
-                        self.elements.elements = elements.elements
-                    } else {
-                        self.elements.type = .label
-                        self.elements.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
-                    }
-                }
-            } catch let error as VariableValueError {
-                self.error = error
-            } catch {
-                print(error)
-            }
-        }
+//        .task(id: variables.hashValue) {
+//            do {
+//                switch stack.content.value {
+//                case let .constant(array):
+//                    let elements = array
+//                    self.elements.type = elements.type
+//                    self.elements.elements = elements.elements
+//                default:
+//                    if isRunning {
+//                        let elements = try stack.content.value(with: variables, and: scope) as ArrayValue
+//                        self.elements.type = elements.type
+//                        self.elements.elements = elements.elements
+//                    } else {
+//                        self.elements.type = .label
+//                        self.elements.elements = [MakeableLabel.withText(stack.content.protoString, multiline: true)]
+//                    }
+//                }
+//            } catch let error as VariableValueError {
+//                self.error = error
+//            } catch {
+//                print(error)
+//            }
+//        }
         .base(stack.base)
         .if(showEditControls) {
             $0.padding(4).overlay(
@@ -107,8 +135,6 @@ public struct MakeableStackView: View {
             AddViewView(viewModel: .init(onSelect: { view in
                 guard let elements = stack.content.value.constant else { return }
                 elements.elements.insert(view, at: index)
-                self.elements.type = elements.type
-                self.elements.elements = elements.elements
                 stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
@@ -126,16 +152,12 @@ public struct MakeableStackView: View {
     private func onRemove(at index: Int) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements.remove(at: index)
-        self.elements.type = elements.type
-        self.elements.elements = elements.elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
     private func onUpdate(at index: Int, with value: any MakeableView) {
         guard let elements = stack.content.value.constant else { return }
         elements.elements[index] = value
-        self.elements.type = elements.type
-        self.elements.elements = elements.elements
         stack.content = .value(elements)
         onContentUpdate(stack)
     }
@@ -147,8 +169,6 @@ public struct MakeableStackView: View {
             guard let view = UIPasteboard.general.pasteValue() as? (any MakeableView) else { return }
             guard let elements = stack.content.value.constant else { return }
             elements.elements.insert(view, at: index)
-            self.elements.type = elements.type
-            self.elements.elements = elements.elements
             stack.content = .value(elements)
             onContentUpdate(stack)
         } label: {
@@ -182,12 +202,12 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         self.init(id: id, base: base, axis: axis, content: .value(elements))
     }
     
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
         MakeableStack(
             id: id,
-            base: try await base.value(with: variables, and: scope),
-            axis: try await axis.value(with: variables, and: scope),
-            content: .value(try await content.value(with: variables, and: scope))
+            base: try base.value(with: variables, and: scope),
+            axis: try axis.value(with: variables, and: scope),
+            content: .value(try content.value(with: variables, and: scope))
         )
     }
     
@@ -204,10 +224,10 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         }
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) async throws {
+    public func insertValues(into variables: Variables, with scope: Scope) throws {
         for element in content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
-            try await element.insertValues(into: variables, with: scope)
+            try element.insertValues(into: variables, with: scope)
         }
     }
 }

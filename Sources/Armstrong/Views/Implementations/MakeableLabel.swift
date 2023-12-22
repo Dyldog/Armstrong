@@ -20,15 +20,6 @@ public struct MakeableLabelView: View {
     @EnvironmentObject var variables: Variables
     @Binding var error: VariableValueError?
     
-    @State var text: String = "LOADING"
-    @State var fontSize: Int = 18
-    @State var fontWeight: Font.Weight = .regular
-    @State var italic: Bool = false
-    @State var base: MakeableBase = .makeDefault()
-    @State var textColor: Color = .black
-    @State var isMultiline: Bool = false
-    
-    
     public init(isRunning: Bool, showEditControls: Bool, scope: Scope, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.isRunning = isRunning
         self.showEditControls = showEditControls
@@ -39,10 +30,12 @@ public struct MakeableLabelView: View {
         self.scope = scope
     }
     
-    func labelText() async -> String {
+    func labelText() -> String {
+        let variables = variables.copy()
+        
         do {
             if isRunning {
-                let value = try await label.text.value(with: variables, and: scope).valueString
+                let value = try label.text.value(with: variables.copy(), and: scope).valueString
                 return value
             } else {
                 return label.protoString
@@ -55,31 +48,36 @@ public struct MakeableLabelView: View {
         }
     }
     
-    private func updateValues() async  {
+    func content() -> some View {
+        let text = labelText()
         do {
-            self.text = await labelText()
-            self.fontSize = (try await label.fontSize.value(with: variables, and: scope) as IntValue).value
-            self.fontWeight = (try await label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value
-            self.italic = (try await label.italic.value(with: variables, and: scope) as BoolValue).value
-            self.base = (try await label.base.value(with: variables, and: scope) as MakeableBase)
-            self.textColor = (try await label.textColor.value(with: variables, and: scope) as ColorValue).value
-            self.isMultiline = (try await label.isMultiline.value(with: variables, and: scope) as BoolValue).value
+            return Text(text)
+                .font(
+                    .system(size: CGFloat((try label.fontSize.value(with: variables, and: scope) as IntValue).value))
+                    .weight((try label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value)
+                )
+                .if((try label.italic.value(with: variables, and: scope) as BoolValue).value) { $0.italic() }
+                .lineLimit((try label.isMultiline.value(with: variables, and: scope) as BoolValue).value ? nil : 1)
+                .foregroundStyle((try label.textColor.value(with: variables, and: scope) as ColorValue).value)
+                .base((try label.base.value(with: variables, and: scope) as MakeableBase))
+                .any
         } catch {
-            fatalError(error.localizedDescription)
+            handleError(error)
+            return Text(text).any
         }
     }
     
     public var body: some View {
-        Text(text)
-            .font(.system(size: CGFloat(fontSize)).weight(fontWeight))
-            .if(italic) { $0.italic() }
-            .lineLimit(isMultiline ? nil : 1)
-            .foregroundStyle(textColor)
-            .base(base)
-            .task(id: variables.hashValue) {
-                await updateValues()
-            }
-            .any
+        Self._printChanges()
+        return content()
+    }
+    
+    private func handleError(_ error: Error) {
+        if let error = error as? VariableValueError {
+            self.error = error
+        } else {
+            print(error.localizedDescription)
+        }
     }
 }
 
@@ -131,8 +129,8 @@ public final class MakeableLabel: MakeableView {
     
     public var valueString: String { text.valueString }
 
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
-        await MakeableLabel(
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+         MakeableLabel(
             id: id,
             text: (try text.value(with: variables, and: scope) as (any EditableVariableValue)).any,
             fontSize: try fontSize.value(with: variables, and: scope),

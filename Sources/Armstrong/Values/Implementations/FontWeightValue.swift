@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Armstrong
 
 extension Font.Weight: PickableValue {
     

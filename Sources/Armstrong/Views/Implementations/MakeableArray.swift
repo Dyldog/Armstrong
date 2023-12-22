@@ -36,16 +36,16 @@ import SwiftUI
 //        fatalError()
 //    }
 //    
-//    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
+//    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
 //        var newViews: [any MakeableView] = []
 //        
 //        for view in value {
-//            newViews.append(try await view.value(with: variables))
+//            newViews.append(try view.value(with: variables))
 //        }
 //        
 //        return MakeableArray(
 //            value: newViews,
-//            axis: try await axis.value(with: variables)
+//            axis: try axis.value(with: variables)
 //        )
 //    }
 //    

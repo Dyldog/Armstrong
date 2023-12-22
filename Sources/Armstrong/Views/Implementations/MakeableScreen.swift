@@ -45,20 +45,20 @@ public struct MakeableScreenView: View {
             error: $error
         )
         
-        .task(id: variables.hashValue) {
-            do {
-                if isRunning {
-                    let varsWithArgs = variables.copy()
-                    let stack: MakeableStack = try await screen.value(with: variables, and: scope)
-                    let variables: DictionaryValue = try await screen.arguments.value(with: variables, and: scope)
-                    varsWithArgs.set(from: variables)
-                    self.content = try await stack.value(with: varsWithArgs, and: scope)
-                } else {
-                    self.content = .init([MakeableLabel.withText(screen.protoString)])
-                }
-            } catch {
-                print(error)
-            }
-        }
+//        .task(id: variables.hashValue) {
+//            do {
+//                if isRunning {
+//                    let varsWithArgs = variables.copy()
+//                    let stack: MakeableStack = try screen.value(with: variables, and: scope)
+//                    let variables: DictionaryValue = try screen.arguments.value(with: variables, and: scope)
+//                    varsWithArgs.set(from: variables)
+//                    self.content = try stack.value(with: varsWithArgs, and: scope)
+//                } else {
+//                    self.content = .init([MakeableLabel.withText(screen.protoString)])
+//                }
+//            } catch {
+//                print(error)
+//            }
+//        }
     }
 }

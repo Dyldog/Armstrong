@@ -28,7 +28,7 @@ public final class {% call ValueTypeName type %}Value: PrimitiveEditableVariable
     
     public var valueString: String { protoString }
     
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
         self
     }
     

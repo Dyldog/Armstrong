@@ -33,15 +33,13 @@ public class ViewMakerViewModel: ObservableObject {
     
     var makeMode: Bool = false {
         didSet {
-            Task {
-                do {
-                    try await self.makeNewVariables()
-                } catch {
-                    if let error = error as? VariableValueError {
-                        self.error = error
-                    } else {
-                        print("Unhandled error: \(error)")
-                    }
+            do {
+                try self.makeNewVariables()
+            } catch {
+                if let error = error as? VariableValueError {
+                    self.error = error
+                } else {
+                    print("Unhandled error: \(error)")
                 }
             }
         }
@@ -51,7 +49,6 @@ public class ViewMakerViewModel: ObservableObject {
     
     @Published private(set) var _variables: Variables
     @Published var error: VariableValueError?
-    @Published var hasFinishedFirstLoad: Bool = false
     
     private var cancellables: Set<AnyCancellable> = .init()
     
@@ -82,18 +79,14 @@ public class ViewMakerViewModel: ObservableObject {
         
         print(screen.codeRepresentation)
         
-        Task { @MainActor in
-            do {
-                try await self.makeNewVariables()
-            } catch {
-                if let error = error as? VariableValueError {
-                    self.error = error
-                } else {
-                    print("Unhandled error: \(error)")
-                }
-                
-                self.hasFinishedFirstLoad = true
-            }
+        do {
+            try self.makeNewVariables()
+        } catch {
+            if let error = error as? VariableValueError {
+                self.error = error
+            } else {
+                print("Unhandled error: \(error)")
+            }            
         }
         
         _variables.objectWillChange.sink { [weak self] _ in
@@ -108,6 +101,10 @@ public class ViewMakerViewModel: ObservableObject {
         }
         .store(in: &cancellables)
         
+        $error.sink { error in
+            print("ERROR: \(error?.localizedDescription)")
+        }.store(in: &cancellables)
+        
 //        $content.dropFirst().sink { content in
 //            onUpdate(.init(name: self.name, initActions: self.initActions, content: content))
 //        }.store(in: &cancellables)
@@ -119,46 +116,60 @@ public class ViewMakerViewModel: ObservableObject {
 //        }.store(in: &cancellables)
     }
     
-    func makeNewVariables() async throws {
-        self._variables = try await self.makeVariables()
+    func makeNewVariables() throws {
+        self._variables = try self.makeVariables()
     }
     
-    func makeVariables() async throws -> Variables {
+    func makeVariables() throws -> Variables {
         let newVars = Variables()
-        try await screen.initialise(with: newVars, and: scope)
-        hasFinishedFirstLoad = true
+        try screen.initialise(with: newVars, and: scope)
         return newVars
     }
     
     func onRuntimeUpdate(completion: @escaping Block) {
-        Task { @MainActor in
-            try await screen.updateVariablesFromContent(vars: variables, and: scope)
+        do {
+            try screen.updateVariablesFromContent(vars: variables, and: scope)
             completion()
-//            self.updater += 1
+        } catch {
+            handleError(error)
         }
     }
     
     func updateInitActions(_ newValue: StepArray) {
-        Task { @MainActor in
+        do {
             screen.initActions = newValue
-            try await makeNewVariables()
+            try makeNewVariables()
             onUpdate?(screen)
+        } catch {
+            handleError(error)
         }
     }
     
     func updateInitVariables(_ newValue: DictionaryValue) {
-        Task { @MainActor in
+        do {
             screen.initVariables = newValue
-            try await makeNewVariables()
+            try makeNewVariables()
             onUpdate?(screen)
+        } catch {
+            handleError(error)
         }
     }
     
     func updateSubscreens(_ newValue: [Screen]) {
-        Task { @MainActor in
+        do {
             screen.subscreens = newValue
-            try await makeNewVariables()
+            try makeNewVariables()
             onUpdate?(screen)
+        } catch {
+            handleError(error)
+        }
+    }
+    
+    private func handleError(_ error: Error) {
+        if let error = error as? VariableValueError {
+            self.error = error
+        } else {
+            print(error.localizedDescription)
         }
     }
 }

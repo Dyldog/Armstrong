@@ -11,28 +11,28 @@ import Combine
 
 public final class Variables: Equatable, ObservableObject, Hashable, Identifiable, Copying {
     
-    @MainActor public var id: String { keyString + valueString }
+    public var id: String { keyString + valueString }
 //    var objectWillChange = PassthroughSubject<Void, Never>()
     
-    @MainActor private(set) var variables: [String: VariableValue]
+    private(set) var variables: [String: VariableValue]
     
-    @MainActor var keys: [String] { Array(variables.keys) }
+    var keys: [String] { Array(variables.keys) }
     
     public init(values: [String: VariableValue] = [:]) {
         variables = values
     }
     
-    @MainActor public func value(for name: String) -> VariableValue? {
+    public func value(for name: String) -> VariableValue? {
         objectWillChange.send()
         return variables[name]?.copy()
     }
     
-    @MainActor public func set(_ value: VariableValue, for name: String) {
+    public func set(_ value: VariableValue, for name: String) {
         objectWillChange.send()
         variables[name] = value.copy()
     }
     
-    @MainActor public func set(from other: Variables) {
+    public func set(from other: Variables) {
         objectWillChange.send()
         for (key, value) in other.variables {
             if self.value(for: key)?.valueString != value.valueString {
@@ -41,39 +41,39 @@ public final class Variables: Equatable, ObservableObject, Hashable, Identifiabl
         }
     }
     
-    @MainActor public func set(from dictionary: DictionaryValue) {
+    public func set(from dictionary: DictionaryValue) {
         objectWillChange.send()
         for value in dictionary.elements {
             set(value.value, for: value.key)
         }
     }
     
-    @MainActor public static func == (lhs: Variables, rhs: Variables) -> Bool {
+    public static func == (lhs: Variables, rhs: Variables) -> Bool {
         let isEqual = (lhs.keyString == rhs.keyString) && (lhs.valueString == rhs.valueString)
         return isEqual
     }
     
-    @MainActor public func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(variables.mapValues { $0.valueString })
     }
     
-    @MainActor public func copy() -> Variables {
+    public func copy() -> Variables {
         return Variables(
             values: variables.mapValues { $0.copy() }
         )
     }
     
-    @MainActor public func removeReturnVariable() {
+    public func removeReturnVariable() {
         variables.removeValue(forKey: "$0")
     }
 }
 
 private extension Variables {
-    @MainActor var keyString: String {
+    var keyString: String {
         variables.keys.sorted().joined()
     }
     
-    @MainActor var valueString: String {
+    var valueString: String {
         variables.values.map { $0.valueString }.sorted().joined()
     }
 }

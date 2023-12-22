@@ -31,14 +31,14 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
     public var valueString: String { "SCREEN(\(name.valueString))" }
     public var protoString: String { "SCREEN(\(name.protoString))" }
     
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue {
-        let name: ScreenNameValue = try await name.value(with: variables, and: scope)
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+        let name: ScreenNameValue = try name.value(with: variables, and: scope)
         guard let screen = name.screen(from: scope) else { throw VariableValueError.screenDoesNotExist(name.protoString) }
         
         
-        await variables.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
-        try await screen.initialise(with: variables, and: scope, useInputVarsForInit: true)
-        return try await screen.content.value(with: variables, and: scope.withScreens(
+         variables.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
+        try screen.initialise(with: variables, and: scope, useInputVarsForInit: true)
+        return try screen.content.value(with: variables, and: scope.withScreens(
             screens: screen.subscreens.map { $0.name },
             factory: { name in screen.subscreens.first(where: { $0.name == name }) }
         ))
@@ -83,9 +83,9 @@ extension ScreenValue: MakeableView, Codable {
         }
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) async throws {
-//        let view: any MakeableView = try await value(with: variables)
-//        try await view.insertValues(into: variables)
+    public func insertValues(into variables: Variables, with scope: Scope) throws {
+//        let view: any MakeableView = try value(with: variables)
+//        try view.insertValues(into: variables)
     }
 }
 

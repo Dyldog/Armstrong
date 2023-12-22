@@ -32,7 +32,7 @@ public final class MakeableBase: MakeableView, Codable {
     
     public var valueString: String { "ERROR!!!" }
 
-    public func value(with variables: Variables, and scope: Scope) async throws -> VariableValue { self }
+    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue { self }
 
     public static func defaultValue(for property: Properties) -> any EditableVariableValue {
         switch property {
