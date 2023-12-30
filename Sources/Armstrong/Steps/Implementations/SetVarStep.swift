@@ -23,11 +23,11 @@ public final class SetVarStep: Step {
     public var protoString: String { "{ $\(varName.protoString) = \(value.protoString) }" }
     public var valueString: String { "{ $\(varName.valueString) = \(value.valueString) }" }
     
-    public func run(with variables: Variables, and scope: Scope) throws {
+    public func run(with variables: Binding<Variables>, and scope: Scope) throws {
         let varValue = try varName.value.value(with: variables, and: scope)
         let valueValue = try value.value(with: variables, and: scope)
 
-         variables.set(valueValue, for: varValue.valueString)
+        variables.wrappedValue.set(valueValue, for: varValue.valueString)
     }
 
     public static func defaultValue(for property: Properties) -> any EditableVariableValue {

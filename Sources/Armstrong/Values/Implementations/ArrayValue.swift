@@ -38,7 +38,7 @@ public final class ArrayValue: EditableVariableValue, ObservableObject {
         return "[\(elements.map { $0.valueString }.joined(separator: ", "))]"
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         var mapped: [any EditableVariableValue] = []
         for element in elements {
             mapped.append(try element.value(with: variables, and: scope))

@@ -29,42 +29,44 @@ public class ViewMakerViewModel: ObservableObject {
     private(set) var scope: Scope!
     
     @Published var showErrors: Bool = false
-//    var error: VariableValueError?
-    
     var makeMode: Bool = false {
         didSet {
             do {
-                try self.makeNewVariables()
+                _variables = try self.makeVariables()
             } catch {
                 if let error = error as? VariableValueError {
-                    self.error = error
+//                    self.error = error
                 } else {
                     print("Unhandled error: \(error)")
                 }
             }
         }
     }
+    @Published private(set) var displayedError: Error?
+    @Published var _variables: Variables
+    var variables: Variables? {
+        get { makeMode ? nil : _variables }
+        set {
+            if let newValue { _variables = newValue }
+        }
+    }
     
-    @Published private(set) var updater: Int = 0
-    
-    @Published private(set) var _variables: Variables
     var error: VariableValueError? {
         willSet { if showErrors { objectWillChange.send() } }
-        didSet { print("ERROR: \(error?.localizedDescription)") }
+        didSet {
+            if showErrors {
+                displayedError = error
+            }
+            
+            print("ERROR: \(error?.localizedDescription ?? "NONE")")
+            print("""
+            VARIABLES:
+            \(_variables.variables.map { "\t\($0.key): \($0.value.valueString)" }.joined(separator: "\n"))
+            """)
+        }
     }
     
     private var cancellables: Set<AnyCancellable> = .init()
-    
-    var variables: Variables {
-        get {
-            guard !makeMode else { return .init() }
-            return _variables
-        }
-        set {
-            guard !self.makeMode, newValue != self._variables else { return }
-            self._variables.set(from: newValue)
-        }
-    }
     
     public init(scope: Scope?, screen: Screen, makeMode: Bool, onUpdate: ((Screen) -> Void)?) {
         self.screen = screen
@@ -79,9 +81,10 @@ public class ViewMakerViewModel: ObservableObject {
         self.scope = self.scope.withScreens(screens: screen.subscreens.map { $0.name }) { screen in
             self.screen.subscreens.first(where: { $0.name == screen })
         }
+        
                 
         do {
-            try self.makeNewVariables()
+            _variables = try self.makeVariables()
         } catch {
             if let error = error as? VariableValueError {
                 self.error = error
@@ -89,10 +92,6 @@ public class ViewMakerViewModel: ObservableObject {
                 print("Unhandled error: \(error)")
             }            
         }
-        
-        _variables.objectWillChange.sink { [weak self] _ in
-            self?.objectWillChange.send()
-        }.store(in: &cancellables)
         
         $title.dropFirst().sink { [weak self] in
             guard let self else { return }
@@ -113,29 +112,34 @@ public class ViewMakerViewModel: ObservableObject {
 //        }.store(in: &cancellables)
     }
     
-    func makeNewVariables() throws {
-        self._variables = try self.makeVariables()
-    }
-    
     func makeVariables() throws -> Variables {
-        let newVars = Variables()
-        try screen.initialise(with: newVars, and: scope)
+        var newVars = Variables()
+        try screen.initialise(with: .init(get: {
+            newVars
+        }, set: {
+            newVars = $0
+        }), and: scope)
+        
         return newVars
     }
     
     func onRuntimeUpdate(completion: @escaping Block) {
-        do {
-            try screen.updateVariablesFromContent(vars: variables, and: scope)
-            completion()
-        } catch {
-            handleError(error)
+            do {
+                try screen.updateVariablesFromContent(vars: .init(get: { [unowned self] in
+                    _variables
+                }, set: { [unowned self] in
+                    _variables = $0
+                }), and: scope)
+                completion()
+            } catch {
+                handleError(error)
+            }
         }
-    }
     
     func updateInitActions(_ newValue: StepArray) {
         do {
             screen.initActions = newValue
-            try makeNewVariables()
+            _variables = try makeVariables()
             onUpdate?(screen)
         } catch {
             handleError(error)
@@ -145,7 +149,7 @@ public class ViewMakerViewModel: ObservableObject {
     func updateInitVariables(_ newValue: DictionaryValue) {
         do {
             screen.initVariables = newValue
-            try makeNewVariables()
+            _variables = try makeVariables()
             onUpdate?(screen)
         } catch {
             handleError(error)
@@ -155,7 +159,7 @@ public class ViewMakerViewModel: ObservableObject {
     func updateSubscreens(_ newValue: [Screen]) {
         do {
             screen.subscreens = newValue
-            try makeNewVariables()
+            _variables = try makeVariables()
             onUpdate?(screen)
         } catch {
             handleError(error)
@@ -168,13 +172,5 @@ public class ViewMakerViewModel: ObservableObject {
         } else {
             print(error.localizedDescription)
         }
-    }
-}
-
-extension ViewMakerViewModel {
-    struct EditRow: Identifiable {
-        var id: Int { index }
-        let index: Int
-        let constructor: MakeableViewConstructor
     }
 }

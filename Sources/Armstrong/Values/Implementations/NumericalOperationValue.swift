@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 public final class NumericalOperationValue: CompositeEditableVariableValue {
     
@@ -36,10 +37,10 @@ public final class NumericalOperationValue: CompositeEditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.numericalOperation, "add")
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         guard
-            let lhs = try lhs.value(with: variables.copy(), and: scope) as? any NumericValue,
-            let rhs = try rhs.value(with: variables.copy(), and: scope) as? any NumericValue
+            let lhs = try lhs.value(with: variables, and: scope) as? any NumericValue,
+            let rhs = try rhs.value(with: variables, and: scope) as? any NumericValue
         else { throw VariableValueError.wrongTypeForOperation }
         
         return try lhs.perform(operation: operation.value, with: rhs)

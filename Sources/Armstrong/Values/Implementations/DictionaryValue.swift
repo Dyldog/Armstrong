@@ -37,7 +37,7 @@ public final class DictionaryValue: EditableVariableValue, ObservableObject {
         )
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         var mapped: [String: AnyValue] = [:]
         for (key, value) in elements {
             mapped[key] = AnyValue(value: try value.value(with: variables, and: scope))

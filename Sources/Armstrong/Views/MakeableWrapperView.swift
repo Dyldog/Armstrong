@@ -9,7 +9,6 @@ import SwiftUI
 import DylKit
 
 public struct MakeableWrapperView: View {
-    let isRunning: Bool
     let showEditControls: Bool
     let view: any MakeableView
     let onContentUpdate: (any MakeableView) -> Void
@@ -17,8 +16,7 @@ public struct MakeableWrapperView: View {
     let scope: Scope
     @Binding var error: VariableValueError?
     
-    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, view: any MakeableView, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
-        self.isRunning = isRunning
+    public init(showEditControls: Bool, scope: Scope, view: any MakeableView, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.showEditControls = showEditControls
         self.view = view
         self.onContentUpdate = onContentUpdate
@@ -28,12 +26,12 @@ public struct MakeableWrapperView: View {
     }
     
     public var body: some View {
-        inner
+        Self._printChanges()
+        return inner
     }
     
     var inner: some View {
         view.make(
-            isRunning: isRunning,
             showEditControls: showEditControls, 
             scope: scope,
             onContentUpdate: onContentUpdate,

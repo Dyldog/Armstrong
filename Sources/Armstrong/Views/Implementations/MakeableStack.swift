@@ -10,7 +10,6 @@ import DylKit
 
 public struct MakeableStackView: View {
     let scope: Scope
-    let isRunning: Bool
     let showEditControls: Bool
     let stack: MakeableStack
     
@@ -19,7 +18,7 @@ public struct MakeableStackView: View {
     
     @State var showAddIndex: Int?
     @State var showEditIndex: Int?
-    @EnvironmentObject var variables: Variables
+    @EnvironmentObject var variables: OptionalBox<Variables>
     @Binding var error: VariableValueError?
     
 //    @StateObject var elements: ArrayValue = .init(type: .string, elements: [])
@@ -30,8 +29,7 @@ public struct MakeableStackView: View {
 //            .map { (offset, element) in .init(element, hash: { $0.encoded().string }) }
 //    }
     
-    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
-        self.isRunning = isRunning
+    public init(showEditControls: Bool, scope: Scope, stack: MakeableStack, onContentUpdate: @escaping (MakeableStack) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, showAddIndex: Int? = nil, showEditIndex: Int? = nil, error: Binding<VariableValueError?>) {
         self.showEditControls = showEditControls
         self.stack = stack
         self.onContentUpdate = onContentUpdate
@@ -43,7 +41,6 @@ public struct MakeableStackView: View {
     }
     
     private var content: ArrayValue {
-        let variables = variables.copy()
         let elements: ArrayValue
         
         do {
@@ -51,8 +48,8 @@ public struct MakeableStackView: View {
             case let .constant(array):
                 elements = array
             default:
-                if isRunning {
-                    elements = try stack.content.value(with: variables, and: scope) as ArrayValue
+                if variables.hasValue {
+                    elements = try stack.content.value(with: $variables.unwrapped, and: scope) as ArrayValue
                 } else {
                     elements = .init(type: .label, elements: [MakeableLabel.withText(stack.content.protoString, multiline: true)])
                 }
@@ -81,7 +78,7 @@ public struct MakeableStackView: View {
             } else {
                 ForEach(enumerated: elements) { (index, element) in
                     HStack {
-                        MakeableWrapperView(isRunning: isRunning, showEditControls: false, scope: scope, view: element as! (any MakeableView), onContentUpdate: {
+                        MakeableWrapperView(showEditControls: false, scope: scope, view: element as! (any MakeableView), onContentUpdate: {
                             self.onUpdate(at: index, with: $0)
                         }, onRuntimeUpdate: onRuntimeUpdate, error: $error)
                         .editable(showEditControls, onEdit: {
@@ -179,7 +176,7 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         self.init(id: id, base: base, axis: axis, content: .value(elements))
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         MakeableStack(
             id: id,
             base: try base.value(with: variables, and: scope),
@@ -201,7 +198,7 @@ public final class MakeableStack: MakeableView, Codable, ObservableObject {
         }
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) throws {
+    public func insertValues(into variables: Binding<Variables>, with scope: Scope) throws {
         for element in content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
             try element.insertValues(into: variables, with: scope)

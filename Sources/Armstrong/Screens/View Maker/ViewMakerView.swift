@@ -18,9 +18,9 @@ public struct ViewMakerView: View {
     }
     
     private var content: some View {
-        CenterStack {
+        Self._printChanges()
+        return CenterStack {
             return MakeableStackView(
-                isRunning: !viewModel.makeMode,
                 showEditControls: viewModel.makeMode,
                 scope: viewModel.scope,
                 stack: viewModel.content,
@@ -32,7 +32,9 @@ public struct ViewMakerView: View {
                 error: $viewModel.error
             ).any
         }
-        .environmentObject(viewModel.variables)
+        .environmentObject(OptionalBox(viewModel.variables) {
+            viewModel.variables = $0
+        })
     }
     
     public var body: some View {

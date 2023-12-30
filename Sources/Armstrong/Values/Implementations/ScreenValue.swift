@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Dylan Elliott on 18/12/2023.
 //
@@ -31,13 +31,17 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
     public var valueString: String { "SCREEN(\(name.valueString))" }
     public var protoString: String { "SCREEN(\(name.protoString))" }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         let name: ScreenNameValue = try name.value(with: variables, and: scope)
         guard let screen = name.screen(from: scope) else { throw VariableValueError.screenDoesNotExist(name.protoString) }
         
+//        var varsWithArgs = variables.wrappedValue.copy()
+//        varsWithArgs.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
         
-         variables.set(from: try arguments.value(with: variables, and: scope) as DictionaryValue)
-        try screen.initialise(with: variables, and: scope, useInputVarsForInit: true)
+//        var argsBinding: Binding<Variables> = .init(get: { varsWithArgs }, set: { varsWithArgs = $0 })
+        
+//        try screen.initialise(with: argsBinding, and: scope, useInputVarsForInit: true)
+        
         return try screen.content.value(with: variables, and: scope.withScreens(
             screens: screen.subscreens.map { $0.name },
             factory: { name in screen.subscreens.first(where: { $0.name == name }) }
@@ -83,7 +87,7 @@ extension ScreenValue: MakeableView, Codable {
         }
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) throws {
+    public func insertValues(into variables: Binding<Variables>, with scope: Scope) throws {
 //        let view: any MakeableView = try value(with: variables)
 //        try view.insertValues(into: variables)
     }

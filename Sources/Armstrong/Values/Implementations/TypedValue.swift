@@ -75,7 +75,7 @@ public enum TypedValueOption<T: TypeableValue>: Codable {
         }
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> T {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> T {
         return try value.value(with: variables, and: scope)
     }
     
@@ -128,7 +128,7 @@ public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable,
     public var protoString: String { "\(value.title): \(value.value.protoString)" }
     public var valueString: String { "\(value.title): \(value.value.valueString)" }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         try value.value.value(with: variables, and: scope)
     }
     

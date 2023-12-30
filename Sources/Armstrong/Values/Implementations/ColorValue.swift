@@ -42,7 +42,7 @@ public final class ColorValue: EditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.color, "add")
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
 }

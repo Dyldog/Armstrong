@@ -33,7 +33,7 @@ public final class ScreenNameValue: EditableVariableValue, ObservableObject {
     public var protoString: String { value }
     public var valueString: String { value }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     

@@ -29,9 +29,9 @@ public final class Variable: EditableVariableValue, ObservableObject {
     public var protoString: String { "$\(value.protoString)" }
     public var valueString: String { "\(value.valueString)" }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         let nameValue = try value.value(with: variables, and: scope)
-        guard let value =  variables.value(for: nameValue.valueString) else {
+        guard let value =  variables.wrappedValue.value(for: nameValue.valueString) else {
             throw VariableValueError.valueNotFoundForVariable(value.protoString)
         }
         return try value.value(with: variables, and: scope)

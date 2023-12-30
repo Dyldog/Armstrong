@@ -36,12 +36,19 @@ public final class ResultValue: EditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.nil, "add")
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
+        var copy = variables.wrappedValue.copy()
+        var binding = Binding {
+            copy
+        } set: {
+            copy = $0
+        }
+
         for step in steps {
-            try step.run(with: variables, and: scope)
+            try step.run(with: binding, and: scope)
         }
         
-        let value: (any VariableValue)? = try variables.value(for: "$0")?.value(with: variables, and: scope)
+        let value: (any VariableValue)? = try copy.value(for: "$0")?.value(with: binding, and: scope)
         return value ?? NilValue()
     }
 }

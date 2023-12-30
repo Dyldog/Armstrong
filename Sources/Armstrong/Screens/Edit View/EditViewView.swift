@@ -26,7 +26,6 @@ struct EditViewView: View {
     var body: some View {
         VStack {
             MakeableWrapperView(
-                isRunning: false,
                 showEditControls: false, 
                 scope: scope,
                 view: viewModel.editable,

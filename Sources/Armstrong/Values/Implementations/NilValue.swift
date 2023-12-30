@@ -32,7 +32,7 @@ public final class NilValue: EditableVariableValue {
         throw VariableValueError.variableCannotPerformOperation(.nil, "add")
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
 }

@@ -9,7 +9,6 @@ import SwiftUI
 import DylKit
 
 public struct MakeableLabelView: View {
-    let isRunning: Bool
     let showEditControls: Bool
     let scope: Scope
     let label: MakeableLabel
@@ -17,11 +16,10 @@ public struct MakeableLabelView: View {
     let onContentUpdate: (MakeableLabel) -> Void
     let onRuntimeUpdate: (@escaping Block) -> Void
     
-    @EnvironmentObject var variables: Variables
+    @EnvironmentObject var variables: OptionalBox<Variables>
     @Binding var error: VariableValueError?
     
-    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
-        self.isRunning = isRunning
+    public init(showEditControls: Bool, scope: Scope, label: MakeableLabel, onContentUpdate: @escaping (MakeableLabel) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.showEditControls = showEditControls
         self.label = label
         self.onContentUpdate = onContentUpdate
@@ -30,40 +28,25 @@ public struct MakeableLabelView: View {
         self.scope = scope
     }
     
-    func labelText() -> String {
-        let variables = variables.copy()
-        
-        do {
-            if isRunning {
-                let value = try label.text.value(with: variables.copy(), and: scope).valueString
-                return value
-            } else {
-                return label.protoString
-            }
-        } catch let error as VariableValueError {
-            self.error = error
-            return "Error"
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
-    
     func content() -> some View {
-        let text = labelText()
         do {
-            return Text(text)
-                .font(
-                    .system(size: CGFloat((try label.fontSize.value(with: variables, and: scope) as IntValue).value))
-                    .weight((try label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value)
-                )
-                .if((try label.italic.value(with: variables, and: scope) as BoolValue).value) { $0.italic() }
-                .lineLimit((try label.isMultiline.value(with: variables, and: scope) as BoolValue).value ? nil : 1)
-                .foregroundStyle((try label.textColor.value(with: variables, and: scope) as ColorValue).value)
-                .base((try label.base.value(with: variables, and: scope) as MakeableBase))
-                .any
+            if variables.hasValue {
+                return Text(try label.text.value(with: $variables.unwrapped, and: scope).valueString)
+                    .font(
+                        .system(size: CGFloat((try label.fontSize.value(with: $variables.unwrapped, and: scope) as IntValue).value))
+                        .weight((try label.fontWeight.value(with: $variables.unwrapped, and: scope) as FontWeightValue).value)
+                    )
+                    .if((try label.italic.value(with: $variables.unwrapped, and: scope) as BoolValue).value) { $0.italic() }
+                    .lineLimit((try label.isMultiline.value(with: $variables.unwrapped, and: scope) as BoolValue).value ? nil : 1)
+                    .foregroundStyle((try label.textColor.value(with: $variables.unwrapped, and: scope) as ColorValue).value)
+                    .base((try label.base.value(with: $variables.unwrapped, and: scope) as MakeableBase))
+                    .any
+            } else {
+                return Text(label.protoString).any
+            }
         } catch {
             handleError(error)
-            return Text(text).any
+            return Text("ERROR").any
         }
     }
     
@@ -121,7 +104,7 @@ public final class MakeableLabel: MakeableView {
         )
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) throws { }
+    public func insertValues(into variables: Binding<Variables>, with scope: Scope) throws { }
     
     public var protoString: String { "LABEL(\(text.protoString))" }
     
@@ -129,7 +112,7 @@ public final class MakeableLabel: MakeableView {
     
     public var valueString: String { text.valueString }
 
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
          MakeableLabel(
             id: id,
             text: (try text.value(with: variables, and: scope) as (any EditableVariableValue)).any,

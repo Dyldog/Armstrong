@@ -61,7 +61,7 @@ public struct Screen: Codable, Identifiable {
 }
 
 extension Screen {
-    func initialise(with vars: Variables, and scope: Scope, useInputVarsForInit: Bool = false) throws {
+    func initialise(with vars: Binding<Variables>, and scope: Scope, useInputVarsForInit: Bool = false) throws {
         
         if !useInputVarsForInit {
             try setInitVars(in: vars)
@@ -72,11 +72,11 @@ extension Screen {
 //         vars.removeReturnVariable()
     }
     
-    func setInitVars(in vars: Variables) throws {
-         vars.set(from: initVariables)
+    func setInitVars(in vars: Binding<Variables>) throws {
+        vars.wrappedValue.set(from: initVariables)
     }
     
-    func runInitActions(with vars: Variables, and scope: Scope) throws {
+    func runInitActions(with vars: Binding<Variables>, and scope: Scope) throws {
         for action in initActions {
             do {
                 try action.run(with: vars, and: scope)
@@ -86,7 +86,7 @@ extension Screen {
         }
     }
     
-    func updateVariablesFromContent(vars: Variables, and scope: Scope) throws {
+    func updateVariablesFromContent(vars: Binding<Variables>, and scope: Scope) throws {
         for element in content.content.value.constant?.elements ?? [] {
             guard let element = element as? (any MakeableView) else { return }
             try?  element.insertValues(into: vars, with: scope)

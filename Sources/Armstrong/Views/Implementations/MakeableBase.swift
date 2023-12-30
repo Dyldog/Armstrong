@@ -24,7 +24,7 @@ public final class MakeableBase: MakeableView, Codable {
         self.cornerRadius = cornerRadius
     }
     
-    public func insertValues(into variables: Variables, with scope: Scope) throws { }
+    public func insertValues(into variables: Binding<Variables>, with scope: Scope) throws { }
     
     public var protoString: String { "ERROR!!!" }
     
@@ -32,7 +32,7 @@ public final class MakeableBase: MakeableView, Codable {
     
     public var valueString: String { "ERROR!!!" }
 
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue { self }
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue { self }
 
     public static func defaultValue(for property: Properties) -> any EditableVariableValue {
         switch property {
@@ -44,7 +44,6 @@ public final class MakeableBase: MakeableView, Codable {
 }
 
 public struct MakeableBaseView: View {
-    let isRunning: Bool
     let showEditControls: Bool
     let base: MakeableBase
     
@@ -52,16 +51,14 @@ public struct MakeableBaseView: View {
     let onRuntimeUpdate: (@escaping Block) -> Void
     let scope: Scope
     
-    @EnvironmentObject var variables: Variables
+    @EnvironmentObject var variables: OptionalBox<Variable>
     @Binding var error: VariableValueError?
         
-    public init(isRunning: Bool, showEditControls: Bool, scope: Scope, base: MakeableBase, onContentUpdate: @escaping (MakeableBase) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
-        self.isRunning = isRunning
+    public init(showEditControls: Bool, scope: Scope, base: MakeableBase, onContentUpdate: @escaping (MakeableBase) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) {
         self.showEditControls = showEditControls
         self.base = base
         self.onContentUpdate = onContentUpdate
         self.onRuntimeUpdate = onRuntimeUpdate
-        self._variables = .init()
         self._error = error
         self.scope = scope
     }

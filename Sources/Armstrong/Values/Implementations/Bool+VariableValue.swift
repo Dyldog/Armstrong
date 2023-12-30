@@ -38,7 +38,7 @@ public final class BoolValue: EditableVariableValue, Codable {
     
     public var valueString: String { self.value ? "true" : "false" }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     

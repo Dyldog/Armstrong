@@ -81,23 +81,23 @@ import DylKit
 
 
 extension MakeableBase {
-    public func make(isRunning: Bool, showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
-        MakeableBaseView(isRunning: isRunning, showEditControls: showEditControls, scope: scope, base: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    public func make(showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        MakeableBaseView(showEditControls: showEditControls, scope: scope, base: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }
 extension MakeableLabel {
-    public func make(isRunning: Bool, showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
-        MakeableLabelView(isRunning: isRunning, showEditControls: showEditControls, scope: scope, label: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    public func make(showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        MakeableLabelView(showEditControls: showEditControls, scope: scope, label: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }
 extension MakeableStack {
-    public func make(isRunning: Bool, showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
-        MakeableStackView(isRunning: isRunning, showEditControls: showEditControls, scope: scope, stack: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    public func make(showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        MakeableStackView(showEditControls: showEditControls, scope: scope, stack: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }
 extension ScreenValue {
-    public func make(isRunning: Bool, showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
-        ScreenValueView(isRunning: isRunning, showEditControls: showEditControls, scope: scope, screen: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
+    public func make(showEditControls: Bool, scope: Scope, onContentUpdate: @escaping (any MakeableView) -> Void, onRuntimeUpdate: @escaping (@escaping Block) -> Void, error: Binding<VariableValueError?>) -> AnyView {
+        ScreenValueView(showEditControls: showEditControls, scope: scope, screen: self, onContentUpdate: onContentUpdate, onRuntimeUpdate: onRuntimeUpdate, error: error).any
     }
 }
 
@@ -120,7 +120,7 @@ public final class AxisValue: PrimitiveEditableVariableValue, Codable, Copying {
     }
     public var protoString: String { "\(value.title)" }
     public var valueString: String { protoString }
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     public func copy() -> AxisValue {
@@ -162,7 +162,7 @@ public final class FontWeightValue: PrimitiveEditableVariableValue, Codable, Cop
     }
     public var protoString: String { "\(value.title)" }
     public var valueString: String { protoString }
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     public func copy() -> FontWeightValue {
@@ -204,7 +204,7 @@ public final class NumericTypeValue: PrimitiveEditableVariableValue, Codable, Co
     }
     public var protoString: String { "\(value.title)" }
     public var valueString: String { protoString }
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     public func copy() -> NumericTypeValue {
@@ -266,7 +266,7 @@ public final class FloatValue: EditableVariableValue, Codable, Copying, NumericV
     }
     public var protoString: String { "\(value)" }
     public var valueString: String { "\(value)"}
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     public func copy() -> FloatValue {
@@ -325,7 +325,7 @@ public final class IntValue: EditableVariableValue, Codable, Copying, NumericVal
     }
     public var protoString: String { "\(value)" }
     public var valueString: String { "\(value)"}
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
     }
     public func copy() -> IntValue {

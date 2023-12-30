@@ -29,7 +29,7 @@ public final class AnyMakeableView: EditableVariableValue, ObservableObject {
         return try value.add(other)
     }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         try value.value(with: variables, and: scope)
     }
     

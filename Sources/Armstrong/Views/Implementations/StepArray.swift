@@ -36,7 +36,7 @@ public final class StepArray: Codable, EditableVariableValue {
     
     public var valueString: String { value.map { $0.protoString }.joined(separator: ",\n") }
     
-    public func value(with variables: Variables, and scope: Scope) throws -> VariableValue {
+    public func value(with variables: Binding<Variables>, and scope: Scope) throws -> VariableValue {
         self
 //        try run(with: variables)
 //        return  variables.value(for: "$0") ?? NilValue()
@@ -67,7 +67,7 @@ public final class StepArray: Codable, EditableVariableValue {
         try container.encode(CodableStepList(steps: value))
     }
     
-    public func run(with variables: Variables, and scope: Scope) throws {
+    public func run(with variables: Binding<Variables>, and scope: Scope) throws {
         for step in value {
             try step.run(with: variables, and: scope)
         }
