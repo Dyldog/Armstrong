@@ -61,7 +61,6 @@ public struct MakeableBaseView: View {
         self.base = base
         self.onContentUpdate = onContentUpdate
         self.onRuntimeUpdate = onRuntimeUpdate
-        self._variables = .init()
         self._error = error
         self.scope = scope
     }
