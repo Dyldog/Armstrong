@@ -9,6 +9,7 @@ import SwiftUI
 
 public final class SetVarStep: Step {
     
+    public static let categories: [ValueCategory] = [.variables]
     public static var title: String { "Set variable" }
     public static var type: VariableType { .setVarStep }
     

@@ -13,6 +13,7 @@ public final class ScreenValue: EditableVariableValue, ObservableObject {
     
     public let id: UUID
     
+    public static let categories: [ValueCategory] = [.views]
     public static var type: VariableType { .screen }
     
     @Published public var name: ScreenNameValue

@@ -10,7 +10,7 @@ import DylKit
 
 // sourcery: variableTypeName = "anyValue", skipCodable
 public final class AnyValue: EditableVariableValue, ObservableObject {
-    
+    public static let categories: [ValueCategory] = [.helperValues]
     public static var type: VariableType { .anyValue }
     public var value: any EditableVariableValue { didSet { objectWillChange.send() } }
     
@@ -40,15 +40,27 @@ public final class AnyValue: EditableVariableValue, ObservableObject {
     public func editView(scope: Scope, title: String, onUpdate: @escaping (AnyValue) -> Void) -> AnyView {
         ExpandableStack(scope: scope, title: title) { [weak self] in
             ProtoText(text: self?.value.protoString ?? "")
-        } content: { [weak self] in
-            if let value = self?.value as? any MakeableView {
-                EditViewView(title: title, scope: scope.next, viewModel: .init(editable: value, onUpdate: { [weak self] in
-                    guard let self else { return }
-                    self.value = $0
-                    onUpdate(self)
-                }), padSteps: false)
+        } content: { [unowned self] in
+            if let value = self.value as? any MakeableView {
+                VStack {
+                    HStack {
+                        Text("Type").bold().scope(scope)
+                        Spacer()
+                        TypePickerButton(valueString: Swift.type(of: value).type.title, elements: AALibrary.shared.values) {
+                            self.value = $0.makeDefault()
+                            onUpdate(self)
+                        }
+                        .scope(scope)
+                    }
+                    
+                    EditViewView(title: title, scope: scope.next, viewModel: .init(editable: value, onUpdate: { [weak self] in
+                        guard let self else { return }
+                        self.value = $0
+                        onUpdate(self)
+                    }), padSteps: false)
+                }
             } else {
-                EditVariableView(scope: scope.next, name: title, value: self?.value ?? NilValue()) { [weak self] in
+                EditVariableView(scope: scope.next, name: title, value: self.value) { [weak self] in
                     guard let self else { return }
                     self.value = $0
                     onUpdate(self)

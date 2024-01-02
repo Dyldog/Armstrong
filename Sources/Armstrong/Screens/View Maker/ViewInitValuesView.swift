@@ -14,6 +14,8 @@ struct ViewInitValuesView: View {
     let initVariablesUpdate: (DictionaryValue) -> Void
     let initActions: StepArray
     let initActionsUpdate: (StepArray) -> Void
+    
+    @State var showSubscreen: Bool = false
     let subscreens: [Screen]
     let subscreensUpdate: ([Screen]) -> Void
     
@@ -45,6 +47,7 @@ struct ViewInitValuesView: View {
                 ) { index, element in
                     HStack {
                         SheetButton(
+                            showSheet: $showSubscreen,
                             title: { Text(element.name).bold() }
                         ) {
                             NavigationView {
@@ -58,7 +61,7 @@ struct ViewInitValuesView: View {
                                 ))
                             }
                         } onLongPress: {
-                            UIPasteboard.general.copy(element)
+                            SharedPasteboard.copy(element)
                         }
                         Spacer()
                         ProtoText(element.content.protoString)
@@ -78,7 +81,7 @@ struct ViewInitValuesView: View {
                         at: index
                     ))
                 } onAddLongPress: { index in
-                    guard let screen = UIPasteboard.general.pasteScreen() else { return }
+                    guard let screen = SharedPasteboard.pasteScreen() else { return }
                     subscreensUpdate(subscreens.inserting(screen, at: index))
                 } onRemove: { index in
                     subscreensUpdate(subscreens.removing(at: index))

@@ -10,6 +10,7 @@ import SwiftUI
 // sourcery: skipCodable
 /// A value that provides a value from the variables
 public final class Variable: EditableVariableValue, ObservableObject {
+    public static let categories: [ValueCategory] = [.computation]
     public static var type: VariableType { .variable }
     public var value: AnyValue { didSet { objectWillChange.send() } }
     

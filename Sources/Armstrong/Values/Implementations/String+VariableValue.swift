@@ -9,7 +9,7 @@ import SwiftUI
 
 // sourcery: skipCodable
 public final class StringValue: EditableVariableValue {
-    
+    public static let categories: [ValueCategory] = [.text]
     public static var type: VariableType { .string }
     public var value: String
     

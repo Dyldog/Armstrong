@@ -8,7 +8,7 @@
 import SwiftUI
 
 public final class ResultValue: EditableVariableValue {
-    
+    public static let categories: [ValueCategory] = [.computation]
     public static var type: VariableType { .result }
     
     public var steps: StepArray

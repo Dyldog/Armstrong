@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// sourcery: categories = ".layout"
 extension Axis: Codable, PickableValue {
     public static var defaultValue: Axis = .vertical
     public var title: String { description }

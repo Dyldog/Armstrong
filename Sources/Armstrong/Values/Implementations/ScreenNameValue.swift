@@ -10,7 +10,7 @@ import SwiftUI
 import DylKit
 
 public final class ScreenNameValue: EditableVariableValue, ObservableObject {
-    
+    public static let categories: [ValueCategory] = [.helperValues]
     public static var type: VariableType { .screenName }
     public var value: String { didSet { objectWillChange.send() } }
     

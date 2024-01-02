@@ -6,22 +6,28 @@
 //
 
 import SwiftUI
+import DylKit
 
 public struct AddViewView: View {
-    @StateObject var viewModel: AddViewViewModel
+    let onSelect: (any MakeableView) -> Void
     
-    public init(viewModel: AddViewViewModel) {
-        self._viewModel = .init(wrappedValue: viewModel)
+    public init(onSelect: @escaping (any MakeableView) -> Void) {
+        self.onSelect = onSelect
     }
     
     public var body: some View {
-        List {
-            ForEach(viewModel.rows, id: \.title) { item in
-                SwiftUI.Button(item.title) {
-                    item.onTap()
-                }
-                .buttonStyle(.plain)
+        NavigationView {
+            CategoryPicker(title: "Select View", elements: (AALibrary.shared.views as [any EditableVariableValue.Type]).categoryTree) {
+                onSelect($0.makeDefault() as! (any MakeableView))
             }
         }
+//        List {
+//            ForEach(viewModel.rows, id: \.title) { item in
+//                SwiftUI.Button(item.title) {
+//                    item.onTap()
+//                }
+//                .buttonStyle(.plain)
+//            }
+//        }
     }
 }

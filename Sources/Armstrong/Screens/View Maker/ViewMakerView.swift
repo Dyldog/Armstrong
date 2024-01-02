@@ -11,6 +11,7 @@ import DylKit
 public struct ViewMakerView: View {
     let isWidget: Bool
     @StateObject var viewModel: ViewMakerViewModel
+    @State var showInitActions: Bool = false
     
     public init(isWidget: Bool = false, viewModel: ViewMakerViewModel) {
         self.isWidget = isWidget
@@ -62,7 +63,10 @@ public struct ViewMakerView: View {
             .toolbar {
                 HStack {
                     if viewModel.makeMode {
-                        SheetButton(title: { Text("Init Actions") }) {
+                        SheetButton(
+                            showSheet: $showInitActions,
+                            title: { Text("Init Actions") }
+                        ) {
                             NavigationView {
                                 ScrollView {
                                     ViewInitValuesView(

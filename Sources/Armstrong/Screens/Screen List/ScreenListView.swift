@@ -74,7 +74,7 @@ public struct ScreenListView: View {
                         screenView(screen, index: index)
                         .swipeActions {
                             Button {
-                                UIPasteboard.general.copy(screen)
+                                SharedPasteboard.copy(screen)
                             } label: {
                                 Label("Copy", systemImage: "doc.on.clipboard")
                             }
@@ -112,7 +112,7 @@ public struct ScreenListView: View {
                 //
             })
         .navigationTitle("Screens")
-        .navigationDestination(for: $selectedScreen, destination: { (screen, index) in
+        .navigationViewDestination(for: $selectedScreen, destination: { (screen, index) in
             ViewMakerView(viewModel: .init(
                 scope: .init(),
                 screen: screen,
@@ -158,7 +158,7 @@ struct NavigationStackModifier<Item, Destination: View>: ViewModifier {
 }
 
 public extension View {
-    func navigationDestination<Item, Destination: View>(
+    func navigationViewDestination<Item, Destination: View>(
         for binding: Binding<Item?>,
         @ViewBuilder destination: @escaping (Item) -> Destination
     ) -> some View {

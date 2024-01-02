@@ -10,7 +10,7 @@ import DylKit
 
 // sourcery: variableTypeName = "list", skipCodable
 public final class ArrayValue: EditableVariableValue, ObservableObject {
-    
+    public static let categories: [ValueCategory] = [.containers]
     public static var type: VariableType { .list }
     
     public var type: VariableType { didSet { objectWillChange.send() } }

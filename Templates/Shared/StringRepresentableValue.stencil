@@ -6,7 +6,7 @@
 
 {% for type in types.implementing.StringRepresentableValue %}
 public final class {{ type.name }}Value: EditableVariableValue, Codable, Copying, NumericValue {
-    
+    public static let categories: [ValueCategory] = [{{ type.annotations.categories }}]
     public static var type: VariableType { .{% call ValueTypeTypeName type %} }
     public var value: {{ type.name }}
     public static var defaultValue: {{ type.name }} = .defaultValue

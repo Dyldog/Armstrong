@@ -7,8 +7,9 @@
 
 import SwiftUI
 
+// sourcery: categories = .text
 extension Font.Weight: PickableValue {
-    
+    public static let categories: [ValueCategory] = [.text]
     public static var defaultValue: Font.Weight { .regular }
     
     public static var allCases: [Font.Weight] { [

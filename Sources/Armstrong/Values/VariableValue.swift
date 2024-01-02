@@ -10,6 +10,7 @@ import SwiftUI
 
 /// Defines the properties required to show and edit the type implementing this protocol
 public protocol VariableValue: Codable, Copying, CodeRepresentable {
+    static var categories: [ValueCategory] { get }
     static var type: VariableType { get }
     func add(_ other: VariableValue) throws -> VariableValue
     var protoString: String { get }

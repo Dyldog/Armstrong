@@ -8,7 +8,7 @@
 import SwiftUI
 
 public final class ColorValue: EditableVariableValue {
-    
+    public static let categories: [ValueCategory] = [.visual]
     public static var type: VariableType { .color }
     
     public var value: Color

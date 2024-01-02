@@ -9,7 +9,7 @@ import SwiftUI
 
 // sourcery: variableTypeName = "boolean"
 public final class BoolValue: EditableVariableValue, Codable {
-    
+    public static let categories: [ValueCategory] = [.logic]
     public static var type: VariableType { .boolean }
     
     public var value: Bool

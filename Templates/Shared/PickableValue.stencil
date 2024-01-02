@@ -7,7 +7,7 @@
 
 {% for type in types.implementing.PickableValue %}
 public final class {% call ValueTypeName type %}Value: PrimitiveEditableVariableValue, Codable, Copying {
-
+    public static let categories: [ValueCategory] = [{{ type.annotations.categories }}]
     public static var type: VariableType { .{% call ValueTypeTypeName type %} }
     public static var defaultValue: {{ type.name }} { .defaultValue }
     public var value: {{ type.name }}

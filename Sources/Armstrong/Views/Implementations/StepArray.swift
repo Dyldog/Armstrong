@@ -11,6 +11,7 @@ import DylKit
 // sourcery: skipCodable
 public final class StepArray: Codable, EditableVariableValue {
     
+    public static let categories: [ValueCategory] = [.computation]
     public static var type: VariableType { .stepArray }
     
     public var value: [any StepType]

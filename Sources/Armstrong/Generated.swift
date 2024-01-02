@@ -105,7 +105,7 @@ extension ScreenValue {
 
 
 public final class AxisValue: PrimitiveEditableVariableValue, Codable, Copying {
-
+    public static let categories: [ValueCategory] = [.layout]
     public static var type: VariableType { .axis }
     public static var defaultValue: Axis { .defaultValue }
     public var value: Axis
@@ -147,7 +147,7 @@ extension VariableType {
 }
 
 public final class FontWeightValue: PrimitiveEditableVariableValue, Codable, Copying {
-
+    public static let categories: [ValueCategory] = [.text]
     public static var type: VariableType { .fontWeight }
     public static var defaultValue: Font.Weight { .defaultValue }
     public var value: Font.Weight
@@ -189,7 +189,7 @@ extension VariableType {
 }
 
 public final class NumericTypeValue: PrimitiveEditableVariableValue, Codable, Copying {
-
+    public static let categories: [ValueCategory] = [.numbers]
     public static var type: VariableType { .numericType }
     public static var defaultValue: NumericType { .defaultValue }
     public var value: NumericType
@@ -235,6 +235,7 @@ extension VariableType {
 
 
 public final class FloatValue: EditableVariableValue, Codable, Copying, NumericValue {
+    public static let categories: [ValueCategory] = [.numbers]
     public static var type: VariableType { .float }
     public var value: Float
     public static var defaultValue: Float = .defaultValue
@@ -294,6 +295,7 @@ extension VariableType {
 }
 
 public final class IntValue: EditableVariableValue, Codable, Copying, NumericValue {
+    public static let categories: [ValueCategory] = [.numbers]
     public static var type: VariableType { .int }
     public var value: Int
     public static var defaultValue: Int = .defaultValue

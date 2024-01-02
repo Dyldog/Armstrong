@@ -8,7 +8,7 @@
 import Foundation
 
 public final class NumericalOperationValue: CompositeEditableVariableValue {
-    
+    public static let categories: [ValueCategory] = [.numbers]
     public static var type: VariableType { .numericalOperation }
     
     public var protoString: String { "\(lhs.protoString) \(operation.protoString) \(rhs.protoString)" }

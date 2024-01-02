@@ -50,7 +50,7 @@ public enum NumericalOperationType: String, Codable, CaseIterable, Titleable, Co
 }
 
 public final class NumericalOperationTypeValue: PrimitiveEditableVariableValue {
-    
+    public static var categories: [ValueCategory] = [.numbers]
     public static var type: VariableType { .numericalOperationType }
     
     public var value: NumericalOperationType

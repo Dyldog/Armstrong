@@ -23,4 +23,5 @@ extension NumericValue {
     }
 }
 
+// sourcery: categories = ".numbers"
 extension NumericType: PickableValue { }

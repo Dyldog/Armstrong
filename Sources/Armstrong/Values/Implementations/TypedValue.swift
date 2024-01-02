@@ -94,7 +94,7 @@ public typealias TypeableValue = EditableVariableValue & Codable
 
 // sourcery: variableTypeName = "typedValue", skipVariableType
 public final class TypedValue<T: TypeableValue>: EditableVariableValue, Codable, ObservableObject {
-    
+    public static var categories: [ValueCategory] { fatalError() }
     public static var type: VariableType { fatalError() }
     
     public var type: VariableType { T.type }

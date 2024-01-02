@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// sourcery: categories = ".numbers"
 extension Int: StringRepresentableValue, Numeric {
     public static var defaultValue: Int = 69
     

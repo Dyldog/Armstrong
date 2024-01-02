@@ -10,7 +10,7 @@ import DylKit
 
 // sourcery: skipCodable
 public final class DictionaryValue: EditableVariableValue, ObservableObject {
-    
+    public static let categories: [ValueCategory] = [.containers]
     public static var type: VariableType { .dictionary }
     
     public var elements: [String: AnyValue]

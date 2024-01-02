@@ -87,7 +87,7 @@ public struct MakeableStackView: View {
                         .editable(showEditControls, onEdit: {
                             self.showEditIndex = index
                         }, onLongPress: {
-                            UIPasteboard.general.copy(element)
+                            SharedPasteboard.copy(element)
                         })
                         
                         if showEditControls {
@@ -109,13 +109,13 @@ public struct MakeableStackView: View {
             )
         }
         .sheet(item: $showAddIndex, content: { index in
-            AddViewView(viewModel: .init(onSelect: { view in
+            AddViewView(onSelect: { view in
                 guard let elements = stack.content.value.constant else { return }
                 elements.elements.insert(view, at: index)
                 stack.content = .value(elements)
                 onContentUpdate(stack)
                 self.showAddIndex = nil
-            }))
+            })
         }).sheet(item: $showEditIndex, content: { index in
             let elements = stack.content.value.constant!
             NavigationView {
@@ -143,7 +143,7 @@ public struct MakeableStackView: View {
         LongPressButton {
             showAddIndex = index
         } longPressAction: {
-            guard let view = UIPasteboard.general.pasteValue() as? (any MakeableView) else { return }
+            guard let view = SharedPasteboard.pasteValue() as? (any MakeableView) else { return }
             guard let elements = stack.content.value.constant else { return }
             elements.elements.insert(view, at: index)
             stack.content = .value(elements)
@@ -157,6 +157,7 @@ public struct MakeableStackView: View {
 }
 
 public final class MakeableStack: MakeableView, Codable, ObservableObject {
+    public static let categories: [ValueCategory] = [.views]
     public static var type: VariableType { .stack }
     
     public let id: UUID

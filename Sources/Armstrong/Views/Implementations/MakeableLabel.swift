@@ -30,40 +30,26 @@ public struct MakeableLabelView: View {
         self.scope = scope
     }
     
-    func labelText() -> String {
-        let variables = variables.copy()
-        
+    func content() -> some View {
         do {
             if isRunning {
                 let value = try label.text.value(with: variables.copy(), and: scope).valueString
-                return value
+                return Text(value)
+                    .font(
+                        .system(size: CGFloat((try label.fontSize.value(with: variables, and: scope) as IntValue).value))
+                        .weight((try label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value)
+                    )
+                    .if((try label.italic.value(with: variables, and: scope) as BoolValue).value) { $0.italic() }
+                    .lineLimit((try label.isMultiline.value(with: variables, and: scope) as BoolValue).value ? nil : 1)
+                    .foregroundStyle((try label.textColor.value(with: variables, and: scope) as ColorValue).value)
+                    .base((try label.base.value(with: variables, and: scope) as MakeableBase))
+                    .any
             } else {
-                return label.protoString
+                return Text(label.protoString).any
             }
-        } catch let error as VariableValueError {
-            self.error = error
-            return "Error"
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
-    
-    func content() -> some View {
-        let text = labelText()
-        do {
-            return Text(text)
-                .font(
-                    .system(size: CGFloat((try label.fontSize.value(with: variables, and: scope) as IntValue).value))
-                    .weight((try label.fontWeight.value(with: variables, and: scope) as FontWeightValue).value)
-                )
-                .if((try label.italic.value(with: variables, and: scope) as BoolValue).value) { $0.italic() }
-                .lineLimit((try label.isMultiline.value(with: variables, and: scope) as BoolValue).value ? nil : 1)
-                .foregroundStyle((try label.textColor.value(with: variables, and: scope) as ColorValue).value)
-                .base((try label.base.value(with: variables, and: scope) as MakeableBase))
-                .any
         } catch {
             handleError(error)
-            return Text(text).any
+            return Text("Error").any
         }
     }
     
@@ -83,6 +69,7 @@ public struct MakeableLabelView: View {
 
 public final class MakeableLabel: MakeableView {
     
+    public static let categories: [ValueCategory] = [.views]
     public static var type: VariableType { .label }
     
     public let id: UUID

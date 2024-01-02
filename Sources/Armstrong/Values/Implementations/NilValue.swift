@@ -9,7 +9,7 @@ import SwiftUI
 
 // sourcery: variableTypeName = "`nil`", skipCodable
 public final class NilValue: EditableVariableValue {
-    
+    public static let categories: [ValueCategory] = [.helperValues]
     public static var type: VariableType { .nil }
     
     private var DUMMYVALUE = "DUMMY"

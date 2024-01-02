@@ -10,7 +10,7 @@ import DylKit
 
 // sourcery: variableTypeName = "view", skipCodable
 public final class AnyMakeableView: EditableVariableValue, ObservableObject {
-    
+    public static let categories: [ValueCategory] = [.helperViews]
     public static var type: VariableType { .view }
     @Published public var value: any MakeableView
     

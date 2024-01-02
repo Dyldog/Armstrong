@@ -11,8 +11,7 @@ import DylKit
 public struct EditVariableView: View {
     let scope: Scope
     let name: String
-    @State var selectedTypeIndex: Int
-    var selectedType: any EditableVariableValue.Type { AALibrary.shared.values[selectedTypeIndex] }
+    var selectedTypeIndex: Int
     @State var value: any EditableVariableValue
     let onUpdate: (any EditableVariableValue) -> Void
     
@@ -29,12 +28,11 @@ public struct EditVariableView: View {
             HStack {
                 Text("Type").bold().scope(scope)
                 Spacer()
-                Picker("Type", selection: $selectedTypeIndex) {
-                    ForEach(enumerated: AALibrary.shared.values) { (index, element) in
-                        Text(element.type.title).tag(index)
-                    }
+                TypePickerButton(valueString: type(of: value).type.title, elements: AALibrary.shared.values) {
+                    self.value = $0.makeDefault()
+                    onUpdate(self.value)
                 }
-                .pickerScope(scope)
+                .scope(scope)
             }
             
             value.editView(scope: scope, title: "Value", onUpdate: {
@@ -44,9 +42,5 @@ public struct EditVariableView: View {
         }
         .buttonStyle(.plain)
         .navigationTitle(name)
-        .onChange(of: selectedTypeIndex, perform: { value in
-            self.value = selectedType.makeDefault()
-            onUpdate(self.value)
-        })
     }
 }
