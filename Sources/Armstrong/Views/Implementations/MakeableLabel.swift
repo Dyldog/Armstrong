@@ -159,3 +159,9 @@ extension MakeableLabel {
         .init(id: .init(), text: text, fontSize: .int(size), fontWeight: .init(value: .regular), italic: .init(value: false), base: .makeDefault(), textColor: .init(value: .black), isMultiline: .false)
     }
 }
+
+extension AnyMakeableView {
+    public static func text(_ text: AnyValue, size: Int = 18) -> AnyMakeableView {
+        .init(value: MakeableLabel.text(text, size: size))
+    }
+}

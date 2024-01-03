@@ -13,6 +13,7 @@ public enum VariableValueError: LocalizedError, Identifiable, Equatable {
     case valueNotFoundForVariable(String)
     case variableCannotPerformOperation(VariableType, String)
     case screenDoesNotExist(String)
+    case emptyCollectionFound
     
     var localizedDescription: String {
         switch self {
@@ -24,6 +25,8 @@ public enum VariableValueError: LocalizedError, Identifiable, Equatable {
             return "Variable \(variable) cannot perform step \(operation)"
         case let .screenDoesNotExist(screen):
             return "Screen '\(screen)' does not exist"
+        case .emptyCollectionFound:
+            return "Step requiring collection value encountered empty collection"
         }
     }
 }

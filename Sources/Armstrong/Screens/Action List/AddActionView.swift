@@ -14,13 +14,9 @@ struct AddActionView: View {
     
     var body: some View {
         NavigationView {
-            List(AALibrary.shared.steps.map { HashableBox($0, hash: { $0.type })}, id: \.self) { item in
-                SwiftUI.Button(item.value.title) {
-                    onSelect(item.value.makeDefault())
-                }
+            CategoryPicker(title: "Select Step", elements: (AALibrary.shared.steps as [any EditableVariableValue.Type]).categoryTree) {
+                onSelect($0.makeDefault() as! (any StepType))
             }
-            .navigationTitle("Add Action")
-            .searchable(text: $searchText)
         }
     }
 }

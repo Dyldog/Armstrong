@@ -11,6 +11,7 @@ private enum Images {
     static let container = "shippingbox"
     static let logic = "brain"
     static let numbers = "function"
+    static let visual = "eye"
 }
 
 public extension ValueCategoryGroup {
@@ -38,7 +39,7 @@ public extension ValueCategory {
 }
 
 public extension ValueCategory {
-    static let visual: ValueCategory = .init(parent: .root, iconName: "eye", title: "Visual")
+    static let visual: ValueCategory = .init(parent: .root, iconName: Images.visual, title: "Visual")
 }
 
 // MARK: - Numbers
@@ -105,6 +106,8 @@ public extension ValueCategory {
     static let logicSteps: ValueCategory = .init(parent: .steps, iconName: Images.logic, title: "Logic")
     
     static let numberSteps: ValueCategory = .init(parent: .steps, iconName: Images.numbers, title: "Numbers")
+    
+    static let visualSteps: ValueCategory = .init(parent: .steps, iconName: Images.visual, title: "Visual")
 }
 
 

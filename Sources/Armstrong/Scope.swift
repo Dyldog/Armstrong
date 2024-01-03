@@ -47,7 +47,7 @@ public struct Scope {
     }
 }
 
-extension View {
+public extension View {
     func scope(_ scope: Scope) -> some View {
         self
             .tint(scope.color)

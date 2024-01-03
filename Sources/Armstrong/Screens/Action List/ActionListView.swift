@@ -48,6 +48,7 @@ struct ActionListView: View {
                             .onLongPressGesture {
                                 SharedPasteboard.copy(element)
                             }
+                            .padding(.bottom)
                         
                         ElementDeleteButton(color: scope.next.color) {
                             steps = steps.removing(at: index)
@@ -55,7 +56,7 @@ struct ActionListView: View {
                         }
                     }
                     
-                    element.editView(scope: scope.next, title: title) { value in
+                    element.editView(scope: scope.next.next, title: title) { value in
                         onUpdate(steps.replacing(value, at: index))
                     }
                     .buttonStyle(.plain)
