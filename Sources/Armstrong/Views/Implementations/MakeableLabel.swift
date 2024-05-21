@@ -155,8 +155,8 @@ extension MakeableLabel: CodeRepresentable {
 }
 
 extension MakeableLabel {
-    public static func text(_ text: AnyValue, size: Int = 18) -> MakeableLabel {
-        .init(id: .init(), text: text, fontSize: .int(size), fontWeight: .init(value: .regular), italic: .init(value: false), base: .makeDefault(), textColor: .init(value: .black), isMultiline: .false)
+    public static func text(_ text: AnyValue, size: Int = 18, isMultiline: BoolValue = .false) -> MakeableLabel {
+        .init(id: .init(), text: text, fontSize: .int(size), fontWeight: .init(value: .regular), italic: .init(value: false), base: .makeDefault(), textColor: .init(value: .black), isMultiline: isMultiline)
     }
 }
 

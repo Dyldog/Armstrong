@@ -127,7 +127,11 @@ extension ArrayValue: Codable {
 
 extension ArrayValue: CodeRepresentable {
     public var codeRepresentation: String {
-        "[\(elements.map { $0.codeRepresentation }.joined(separator: ", "))]"
+        """
+        [
+        \(elements.map { $0.codeRepresentation }.joined(separator: ",\n").indented(1))
+        ]
+        """
     }
 }
 

@@ -31,6 +31,7 @@ public struct ScreenListView: View {
     @State var selectedScreen: (Screen, Int?)?
     @State var showExport: Bool = false
     @State var exportScreen: Screen?
+	@State var showCopySheet: Bool = false
     
     public init(viewModel: ScreenListViewModel) {
         self.viewModel = viewModel
@@ -65,6 +66,33 @@ public struct ScreenListView: View {
         }
         .tint(.yellow)
     }
+	
+	func copyButton(for screen: Screen) -> some View {
+		Button {
+			SharedPasteboard.copy(screen)
+		} label: {
+			Label("Copy", systemImage: "doc.on.clipboard")
+		}
+		.tint(.blue)
+	}
+	
+	func codeButton(for screen: Screen) -> some View {
+		Button {
+			SharedPasteboard.string = screen.codeRepresentation
+		} label: {
+			Label("Copy Code", systemImage: "swift")
+		}
+		.tint(.orange)
+	}
+	func deleteButton(forScreenAt index: Int) -> some View {
+		Button {
+			viewModel.screens.remove(atOffsets: [index])
+			viewModel.objectWillChange.send()
+		} label: {
+			Label("Delete", systemImage: "trash")
+		}
+		.tint(.red)
+	}
     
     public var body: some View {
         List {
@@ -73,22 +101,10 @@ public struct ScreenListView: View {
                     ForEach(viewModel.screens.enumeratedArray(), id: \.element.id) { (index, screen) in
                         screenView(screen, index: index)
                         .swipeActions {
-                            Button {
-                                SharedPasteboard.copy(screen)
-                            } label: {
-                                Label("Copy", systemImage: "doc.on.clipboard")
-                            }
-                            .tint(.blue)
-                            
+                            copyButton(for: screen)
+							codeButton(for: screen)
                             exportButton(for: screen)
-                
-                            Button {
-                                viewModel.screens.remove(atOffsets: [index])
-                                viewModel.objectWillChange.send()
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                            .tint(.red)
+							deleteButton(forScreenAt: index)
                         }
                     }
                 }
@@ -98,6 +114,8 @@ public struct ScreenListView: View {
                 ForEach(viewModel.defaultScreens) { screen in
                         screenView(screen, index: nil)
                         .swipeActions {
+							copyButton(for: screen)
+							codeButton(for: screen)
                             exportButton(for: screen)
                         }
                 }

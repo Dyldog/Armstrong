@@ -19,7 +19,7 @@ extension Screen: CodeRepresentable {
             \(initActions.declarationCodeRepresentation)
             }
             var body: some View {
-                \(content.codeRepresentation)
+        \(content.codeRepresentation.indented(2))
             }
         }
         """
