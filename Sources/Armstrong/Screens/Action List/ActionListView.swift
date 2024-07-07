@@ -7,11 +7,6 @@
 
 import SwiftUI
 import DylKit
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
 
 struct ActionListView: View {
     let scope: Scope
@@ -46,7 +41,7 @@ struct ActionListView: View {
                             .bold()
                             .scope(scope.next)
                             .onLongPressGesture {
-                                SharedPasteboard.copy(element)
+                                DylKit.Pasteboard.general.copy(element)
                             }
                             .padding(.bottom)
                         
@@ -81,7 +76,7 @@ struct ActionListView: View {
         LongPressButton {
             showAddIndex = index
         } longPressAction: {
-            guard let step = SharedPasteboard.pasteValue() as? any StepType else { return }
+            guard let step = DylKit.Pasteboard.general.pasteValue() as? any StepType else { return }
             steps = steps.inserting(step, at: index)
             onUpdate(steps)
         } label: {
@@ -94,7 +89,7 @@ struct ActionListView: View {
 
 import AudioToolbox
 
-public extension Pasteboard {
+public extension DylKit.Pasteboard {
     func copy(_ value: any EditableVariableValue) {
         self.string = CodableVariableValue(value: value).encoded().string
         AudioServicesPlayAlertSoundWithCompletion(SystemSoundID(kSystemSoundID_Vibrate)) {   }
@@ -126,31 +121,3 @@ public extension Pasteboard {
         return value
     }
 }
-
-public protocol Pasteboard: AnyObject {
-    var string: String? { get set }
-}
-
-public var SharedPasteboard: Pasteboard {
-#if canImport(UIKit)
-    return UIPasteboard.general
-#else
-    return NSPasteboard.general
-#endif
-}
-
-#if canImport(UIKit)
-extension UIPasteboard: Pasteboard { }
-#else
-extension NSPasteboard: Pasteboard {
-    public var string: String? {
-        get {
-            string(forType: .string)
-        }
-        set {
-            guard let newValue else { return }
-            setString(newValue, forType: .string)
-        }
-    }
-}
-#endif

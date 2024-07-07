@@ -16,7 +16,7 @@ public struct AddViewView: View {
     }
     
     public var body: some View {
-        NavigationView {
+        NavigationStack {
             CategoryPicker(title: "Select View", elements: (AALibrary.shared.views as [any EditableVariableValue.Type]).categoryTree) {
                 onSelect($0.makeDefault() as! (any MakeableView))
             }

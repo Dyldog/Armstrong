@@ -87,7 +87,7 @@ public struct MakeableStackView: View {
                         .editable(showEditControls, onEdit: {
                             self.showEditIndex = index
                         }, onLongPress: {
-                            SharedPasteboard.copy(element)
+                            DylKit.Pasteboard.general.copy(element)
                         })
                         
                         if showEditControls {
@@ -143,7 +143,7 @@ public struct MakeableStackView: View {
         LongPressButton {
             showAddIndex = index
         } longPressAction: {
-            guard let view = SharedPasteboard.pasteValue() as? (any MakeableView) else { return }
+            guard let view = DylKit.Pasteboard.general.pasteValue() as? (any MakeableView) else { return }
             guard let elements = stack.content.value.constant else { return }
             elements.elements.insert(view, at: index)
             stack.content = .value(elements)

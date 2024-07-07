@@ -13,7 +13,7 @@ struct AddActionView: View {
     let onSelect: (any StepType) -> Void
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             CategoryPicker(title: "Select Step", elements: (AALibrary.shared.steps as [any EditableVariableValue.Type]).categoryTree) {
                 onSelect($0.makeDefault() as! (any StepType))
             }

@@ -69,7 +69,7 @@ public struct ScreenListView: View {
 	
 	func copyButton(for screen: Screen) -> some View {
 		Button {
-			SharedPasteboard.copy(screen)
+            DylKit.Pasteboard.general.copy(screen)
 		} label: {
 			Label("Copy", systemImage: "doc.on.clipboard")
 		}
@@ -78,7 +78,7 @@ public struct ScreenListView: View {
 	
 	func codeButton(for screen: Screen) -> some View {
 		Button {
-			SharedPasteboard.string = screen.codeRepresentation
+            DylKit.Pasteboard.general.string = screen.codeRepresentation
 		} label: {
 			Label("Copy Code", systemImage: "swift")
 		}
@@ -130,7 +130,7 @@ public struct ScreenListView: View {
                 //
             })
         .navigationTitle("Screens")
-        .navigationViewDestination(for: $selectedScreen, destination: { (screen, index) in
+        .navigationDestination(for: $selectedScreen, destination: { (screen, index) in
             ViewMakerView(viewModel: .init(
                 scope: .init(),
                 screen: screen,

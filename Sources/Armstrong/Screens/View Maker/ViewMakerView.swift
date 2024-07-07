@@ -67,7 +67,7 @@ public struct ViewMakerView: View {
                             showSheet: $showInitActions,
                             title: { Text("Init Actions") }
                         ) {
-                            NavigationView {
+                            NavigationStack {
                                 ScrollView {
                                     ViewInitValuesView(
                                         scope: viewModel.scope,

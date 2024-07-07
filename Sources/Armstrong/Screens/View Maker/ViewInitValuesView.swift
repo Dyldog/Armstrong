@@ -50,7 +50,7 @@ struct ViewInitValuesView: View {
                             showSheet: $showSubscreen,
                             title: { Text(element.name).bold() }
                         ) {
-                            NavigationView {
+                            NavigationStack {
                                 ViewMakerView(viewModel: .init(
                                     scope: scope, 
                                     screen: element,
@@ -61,7 +61,7 @@ struct ViewInitValuesView: View {
                                 ))
                             }
                         } onLongPress: {
-                            SharedPasteboard.copy(element)
+                            DylKit.Pasteboard.general.copy(element)
                         }
                         Spacer()
                         ProtoText(element.content.protoString)
@@ -81,7 +81,7 @@ struct ViewInitValuesView: View {
                         at: index
                     ))
                 } onAddLongPress: { index in
-                    guard let screen = SharedPasteboard.pasteScreen() else { return }
+                    guard let screen = DylKit.Pasteboard.general.pasteScreen() else { return }
                     subscreensUpdate(subscreens.inserting(screen, at: index))
                 } onRemove: { index in
                     subscreensUpdate(subscreens.removing(at: index))

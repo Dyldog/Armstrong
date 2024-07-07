@@ -71,7 +71,7 @@ public struct ExpandableStack<Header: View, Body: View>: View {
             }
         }
         .sheet(isPresented: $sheetPresented, content: {
-            NavigationView {
+            NavigationStack {
                 ScrollView {
                     content()
                         .padding()
